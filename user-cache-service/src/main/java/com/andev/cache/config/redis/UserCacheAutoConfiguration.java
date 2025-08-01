@@ -47,7 +47,13 @@ public class UserCacheAutoConfiguration {
     public DataSource snapshotDataSource(@Validated UserCacheProperties properties) {
         UserCacheProperties.Database dbConfig = properties.getDatabase();
         
-        log.info("Creating HikariDataSource with URL: {}", dbConfig.getUrl());
+        log.info("=== CREATING SNAPSHOT DATASOURCE ===");
+        log.info("JDBC URL: {}", dbConfig.getUrl());
+        log.info("Username: {}", dbConfig.getUsername());
+        log.info("Driver: {}", dbConfig.getDriverClassName());
+        log.info("Max pool size: {}", dbConfig.getHikari().getMaximumPoolSize());
+        log.info("Min idle: {}", dbConfig.getHikari().getMinimumIdle());
+        log.info("Connection timeout: {}ms", dbConfig.getHikari().getConnectionTimeout());
         
         HikariDataSource dataSource = new HikariDataSource();
         dataSource.setJdbcUrl(dbConfig.getUrl());
@@ -59,6 +65,7 @@ public class UserCacheAutoConfiguration {
         dataSource.setConnectionTimeout(dbConfig.getHikari().getConnectionTimeout());
         dataSource.setPoolName("UserCacheHikariPool");
 
+        log.info("=== SNAPSHOT DATASOURCE CREATED ===");
         return dataSource;
     }
 
@@ -121,10 +128,17 @@ public class UserCacheAutoConfiguration {
 
     public static class UserCacheInitializer {
         public UserCacheInitializer(UserCacheProperties properties) {
-            log.info("Initializing user cache service with Redis and PostgreSQL support");
-            log.info("Database: {}", properties.getDatabase().getUrl());
-            log.info("Redis: {}:{}", properties.getRedis().getHost(), properties.getRedis().getPort());
-            log.info("User Service: {}", properties.getCache().getUserServiceBaseUrl());
+            log.info("=== USER CACHE SERVICE INITIALIZATION ===");
+            log.info("Service enabled: {}", properties.isEnabled());
+            log.info("Database URL: {}", properties.getDatabase().getUrl());
+            log.info("Database username: {}", properties.getDatabase().getUsername());
+            log.info("Database driver: {}", properties.getDatabase().getDriverClassName());
+            log.info("Redis host: {}:{}", properties.getRedis().getHost(), properties.getRedis().getPort());
+            log.info("Redis database: {}", properties.getRedis().getDatabase());
+            log.info("User Service URL: {}", properties.getCache().getUserServiceBaseUrl());
+            log.info("Redis TTL: {}", properties.getCache().getRedisTtl());
+            log.info("Database TTL: {}", properties.getCache().getDatabaseTtl());
+            log.info("=== END INITIALIZATION ===");
         }
     }
 }

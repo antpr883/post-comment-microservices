@@ -40,7 +40,7 @@ public class UserCacheProperties {
     
     @Data
     public static class Database {
-        private String url = "jdbc:postgresql://localhost:5432/user_snapshot?ssl=false";
+        private String url = "jdbc:postgresql://localhost:5433/user_snapshot?ssl=false";
         private String username = "snap_user";
         private String password = "1234";
         private String driverClassName = "org.postgresql.Driver";

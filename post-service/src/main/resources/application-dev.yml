@@ -50,10 +50,15 @@ logging:
   level:
     root: ${LOG_LEVEL:INFO}
     com.postserve.example: ${LOG_LEVEL_APP:DEBUG}
+    com.andev.cache: DEBUG
+    com.andev.post: DEBUG
     org.hibernate.type.descriptor.sql: ${LOG_LEVEL_SQL_PARAMS:TRACE}
     org:
       springframework:
         web: ${SPRING_WEB_LOG_LEVEL:DEBUG}
         security: ${SPRING_SECURITY_LOG_LEVEL:INFO}
+        data:
+          redis: DEBUG
+          jpa: DEBUG
       liquibase: ${LIQUIBASE_LOG_LEVEL:INFO}
       mapstruct: DEBUG

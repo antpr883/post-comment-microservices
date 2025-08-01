@@ -29,6 +29,13 @@ public class RedisConfig {
     public RedisConnectionFactory redisConnectionFactory() {
         UserCacheProperties.Redis redisConfig = properties.getRedis();
         
+        log.info("=== CREATING REDIS CONNECTION FACTORY ===");
+        log.info("Redis host: {}", redisConfig.getHost());
+        log.info("Redis port: {}", redisConfig.getPort());
+        log.info("Redis database: {}", redisConfig.getDatabase());
+        log.info("Redis timeout: {}", redisConfig.getTimeout());
+        log.info("Redis password: {}", redisConfig.getPassword() != null && !redisConfig.getPassword().isEmpty() ? "***" : "none");
+        
         RedisStandaloneConfiguration config = new RedisStandaloneConfiguration();
         config.setHostName(redisConfig.getHost());
         config.setPort(redisConfig.getPort());
@@ -38,8 +45,8 @@ public class RedisConfig {
             config.setPassword(redisConfig.getPassword());
         }
         
-        log.info("Configuring Redis connection: {}:{} (database: {})", 
-                redisConfig.getHost(), redisConfig.getPort(), redisConfig.getDatabase());
+        log.info("Redis configuration created successfully");
+        log.info("=== REDIS CONNECTION FACTORY CREATED ===");
         
         return new LettuceConnectionFactory(config);
     }

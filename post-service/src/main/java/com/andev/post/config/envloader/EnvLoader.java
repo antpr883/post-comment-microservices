@@ -21,7 +21,8 @@ public class EnvLoader {
         String filename = profile + ".env";
 
         Dotenv dotenv = Dotenv.configure()
-                .filename("post-service/" + filename)
+                .filename(filename)
+                //  .filename("post-service/" + filename)
                 .ignoreIfMissing()
                 .load();
 

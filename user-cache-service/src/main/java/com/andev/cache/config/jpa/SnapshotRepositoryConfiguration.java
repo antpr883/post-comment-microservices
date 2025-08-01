@@ -2,6 +2,7 @@ package com.andev.cache.config.jpa;
 
 import com.andev.cache.config.UserCacheProperties;
 import jakarta.persistence.EntityManagerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -24,6 +25,7 @@ import static com.andev.cache.config.jpa.TransactionSnapshotConstants.SNAPSHOT_E
 import static com.andev.cache.config.jpa.TransactionSnapshotConstants.SNAPSHOT_TRANSACTION_MANAGER;
 
 
+@Slf4j
 @Configuration
 @EnableTransactionManagement
 @EnableJpaRepositories(
@@ -39,6 +41,10 @@ public class SnapshotRepositoryConfiguration {
     public LocalContainerEntityManagerFactoryBean snapshotEntityManagerFactory(
             @Qualifier("snapshotDataSource") DataSource dataSource) {
 
+        log.info("=== CREATING SNAPSHOT ENTITY MANAGER FACTORY ===");
+        log.info("Packages to scan: com.andev.cache.model.entities");
+        log.info("DataSource: {}", dataSource.getClass().getSimpleName());
+
         LocalContainerEntityManagerFactoryBean emf = new LocalContainerEntityManagerFactoryBean();
         emf.setDataSource(dataSource);
         emf.setPackagesToScan("com.andev.cache.model.entities");
@@ -48,7 +54,11 @@ public class SnapshotRepositoryConfiguration {
         props.put("hibernate.hbm2ddl.auto", "create");
         props.put("hibernate.dialect", "org.hibernate.dialect.PostgreSQLDialect");
         props.put("hibernate.show_sql", "false");
+        props.put("hibernate.default_schema", "v1_snap_user");
         emf.setJpaPropertyMap(props);
+
+        log.info("Hibernate properties: {}", props);
+        log.info("=== SNAPSHOT ENTITY MANAGER FACTORY CREATED ===");
 
         return emf;
     }
@@ -57,6 +67,9 @@ public class SnapshotRepositoryConfiguration {
     @ConditionalOnMissingBean(name = SNAPSHOT_TRANSACTION_MANAGER)
     public PlatformTransactionManager snapshotTransactionManager(
             @Qualifier(SNAPSHOT_ENTITY_MANAGER_FACTORY) EntityManagerFactory emf) {
-        return new JpaTransactionManager(emf);
+        log.info("=== CREATING SNAPSHOT TRANSACTION MANAGER ===");
+        JpaTransactionManager transactionManager = new JpaTransactionManager(emf);
+        log.info("=== SNAPSHOT TRANSACTION MANAGER CREATED ===");
+        return transactionManager;
     }
 }
