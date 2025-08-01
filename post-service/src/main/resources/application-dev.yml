@@ -1,0 +1,59 @@
+server:
+  port: ${SERVER_PORT:8081}
+
+spring:
+  application:
+    name: ${APP_NAME:post-service}
+
+  # ========== PRIMARY DATABASE ==========
+  datasource:
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5433}/${DB_NAME:post_hub}?${DB_PARAMS:ssl=false}
+    driver-class-name: ${DB_DRIVER:org.postgresql.Driver}
+    username: ${DB_USERNAME:post_user}
+    password: ${DB_PASSWORD:1234}
+
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 2
+      connection-timeout: 10000
+
+  # ========== JPA (PRIMARY) ==========
+  jpa:
+    open-in-view: false
+    show-sql: ${SPRING_JPA_SHOW_SQL:true}
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    hibernate:
+      ddl-auto: ${SPRING_JPA_HIBERNATE_DDL_AUTO:create-drop}
+    properties:
+      hibernate:
+        format_sql: true
+        use_sql_comments: true
+        default_schema: ${SPRING_JPA_HIBERNATE_DEFAULT_SCHEMA:public}
+
+  # ========== LIQUIBASE ==========
+  liquibase:
+    enabled: ${SPRING_LIQUIBASE_ENABLED:false}  # Увімкни тільки для test-профілю
+    change-log: ${SPRING_LIQUIBASE_CHANGE_LOG:classpath:db/changelog/db.changelog-master.xml}
+    default-schema: ${SPRING_LIQUIBASE_DEFAULT_SCHEMA:v1_post_hub}
+    liquibase-schema: ${SPRING_LIQUIBASE_SCHEMA:public}
+    contexts: ${SPRING_LIQUIBASE_CONTEXTS:}
+    label-filter: ${SPRING_LIQUIBASE_LABEL_FILTER:}
+
+  # ========== H2 (Disabled) ==========
+  h2:
+    console:
+      enabled: false
+
+
+# ========== LOGGING ==========
+logging:
+  level:
+    root: ${LOG_LEVEL:INFO}
+    com.postserve.example: ${LOG_LEVEL_APP:DEBUG}
+    org.hibernate.type.descriptor.sql: ${LOG_LEVEL_SQL_PARAMS:TRACE}
+    org:
+      springframework:
+        web: ${SPRING_WEB_LOG_LEVEL:DEBUG}
+        security: ${SPRING_SECURITY_LOG_LEVEL:INFO}
+      liquibase: ${LIQUIBASE_LOG_LEVEL:INFO}
+      mapstruct: DEBUG

@@ -1,0 +1,47 @@
+# Development Configuration for User Cache Service
+user-cache:
+  enabled: true
+  
+  # Database configuration for development
+  database:
+    url: jdbc:postgresql://localhost:5432/user_cache_dev
+    username: postgres
+    password: postgres
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: 3
+      minimum-idle: 1
+      connection-timeout: 5000
+  
+  # Redis configuration for development
+  redis:
+    host: localhost
+    port: 6379
+    password: 
+    database: 1
+    timeout: 1s
+    lettuce:
+      pool:
+        max-active: 4
+        min-idle: 0
+  
+  # Cache configuration for development
+  cache:
+    redis-key-prefix: "dev:user:"
+    redis-ttl: 15m
+    database-ttl: 2h
+    user-service-base-url: http://localhost:8081
+  
+  # Cleanup configuration for development
+  cleanup:
+    cron: "0 */30 * * * ?"  # Every 30 minutes
+    batch-size: 50
+
+# Development logging
+logging:
+  level:
+    com.andev.cache: DEBUG
+    org.springframework.data.redis: DEBUG
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+    org.springframework.web.client.RestTemplate: DEBUG 
