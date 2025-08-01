@@ -23,6 +23,7 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.client.RestTemplate;
 
 import javax.sql.DataSource;
@@ -43,8 +44,10 @@ public class UserCacheAutoConfiguration {
     @Bean(name = "snapshotDataSource")
     @ConditionalOnMissingBean(name = "snapshotDataSource")
     @ConditionalOnProperty(name = "user-cache.enabled", havingValue = "true", matchIfMissing = true)
-    public DataSource snapshotDataSource(UserCacheProperties properties) {
+    public DataSource snapshotDataSource(@Validated UserCacheProperties properties) {
         UserCacheProperties.Database dbConfig = properties.getDatabase();
+        
+        log.info("Creating HikariDataSource with URL: {}", dbConfig.getUrl());
         
         HikariDataSource dataSource = new HikariDataSource();
         dataSource.setJdbcUrl(dbConfig.getUrl());
@@ -107,11 +110,8 @@ public class UserCacheAutoConfiguration {
     public UserCacheService userCacheService(
             RedisUserCacheService redisUserCacheService,
             DatabaseUserCacheService databaseUserCacheService,
-            UserHubClient userHubClient,
-            UserSnapshotRepository userSnapshotRepository,
-            com.andev.cache.model.domain.mapper.UserMapper userMapper,
-            UserCacheProperties properties) {
-        return new UserCacheServiceImpl(redisUserCacheService, databaseUserCacheService, userHubClient, userSnapshotRepository, userMapper, properties);
+            UserHubClient userHubClient){
+        return new UserCacheServiceImpl(redisUserCacheService, databaseUserCacheService, userHubClient);
     }
 
     @Bean

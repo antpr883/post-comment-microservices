@@ -37,8 +37,7 @@ public class SnapshotRepositoryConfiguration {
     @Bean(name = SNAPSHOT_ENTITY_MANAGER_FACTORY)
     @ConditionalOnMissingBean(name = SNAPSHOT_ENTITY_MANAGER_FACTORY)
     public LocalContainerEntityManagerFactoryBean snapshotEntityManagerFactory(
-            @Qualifier("snapshotDataSource") DataSource dataSource,
-            UserCacheProperties properties) {
+            @Qualifier("snapshotDataSource") DataSource dataSource) {
 
         LocalContainerEntityManagerFactoryBean emf = new LocalContainerEntityManagerFactoryBean();
         emf.setDataSource(dataSource);

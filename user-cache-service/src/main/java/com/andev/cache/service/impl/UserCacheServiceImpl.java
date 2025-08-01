@@ -28,9 +28,6 @@ public class UserCacheServiceImpl implements UserCacheService {
     private final RedisUserCacheService redisUserCacheService;
     private final DatabaseUserCacheService databaseUserCacheService;
     private final UserHubClient userHubClient;
-    private final UserSnapshotRepository userSnapshotRepository;
-    private final UserMapper userMapper;
-    private final UserCacheProperties properties;
 
     @Override
     public Optional<Map<String, Object>> getUserById(Long userId) {

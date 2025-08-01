@@ -20,7 +20,10 @@ public class EnvLoader {
 
         String filename = profile + ".env";
 
-        Dotenv dotenv = Dotenv.configure().filename(filename).ignoreIfMissing().load();
+        Dotenv dotenv = Dotenv.configure()
+                .filename("post-service/" + filename)
+                .ignoreIfMissing()
+                .load();
 
         dotenv.entries().forEach(entry -> System.setProperty(entry.getKey(), entry.getValue()));
     }
