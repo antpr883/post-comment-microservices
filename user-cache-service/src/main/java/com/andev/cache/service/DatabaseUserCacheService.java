@@ -11,11 +11,6 @@ public interface DatabaseUserCacheService {
     Optional<Map<String, Object>> getUserById(Long userId);
 
     /**
-     * Cache user in database
-     */
-    void cacheUser(Long userId, Map<String, Object> userData);
-
-    /**
      * Evict user from database cache
      */
     void evictUser(Long userId);

@@ -39,17 +39,6 @@ public class DatabaseUserCacheServiceImpl implements DatabaseUserCacheService {
 
     @Override
     @Transactional
-    public void cacheUser(Long userId, Map<String, Object> userData) {
-        try {
-            userSnapshotRepository.saveUserSnapshot(userId, userData);
-            log.debug("User cached in database: {}", userId);
-        } catch (Exception e) {
-            log.error("Error caching user in database: {}", userId, e);
-        }
-    }
-
-    @Override
-    @Transactional
     public void evictUser(Long userId) {
         try {
             userSnapshotRepository.deleteById(userId);

@@ -60,7 +60,6 @@ public class UserCacheServiceImpl implements UserCacheService {
             log.debug("User fetched from external service: {}", userId);
             // Cache in both Redis and Database
             redisUserCacheService.cacheUser(userId, userData.get());
-            databaseUserCacheService.cacheUser(userId, userData.get());
             return userData;
         }
 
@@ -85,7 +84,6 @@ public class UserCacheServiceImpl implements UserCacheService {
         
         // Cache in both Redis and Database
         redisUserCacheService.cacheUser(userId, userData);
-        databaseUserCacheService.cacheUser(userId, userData);
     }
 
     @Override

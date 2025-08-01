@@ -46,11 +46,6 @@ public interface UserSnapshotRepository extends JpaRepository<User, Long> {
     default Map<String, Object> findUserDataById(Long userId) {
         return findUserById(userId)
                 .map(user -> {
-                    // If userData is available, return it directly
-                    if (user.getUserData() != null && !user.getUserData().isEmpty()) {
-                        return user.getUserData();
-                    }
-                    
                     // Fallback to basic fields if userData is not available
                     Map<String, Object> userData = new HashMap<>();
                     userData.put("userId", user.getUserId());
@@ -61,17 +56,4 @@ public interface UserSnapshotRepository extends JpaRepository<User, Long> {
                 })
                 .orElse(null);
     }
-
-    /**
-     * Save user snapshot with Map data
-     */
-    @Modifying
-    @Query(value = "INSERT INTO users (user_id, username, cached_at, expires_at, user_data) " +
-           "VALUES (:#{#userId}, :#{#userData['username']}, :#{#userData['cachedAt']}, :#{#userData['expiresAt']}, :#{#userData}::jsonb) " +
-           "ON CONFLICT (user_id) DO UPDATE SET " +
-           "username = EXCLUDED.username, " +
-           "cached_at = EXCLUDED.cached_at, " +
-           "expires_at = EXCLUDED.expires_at, " +
-           "user_data = EXCLUDED.user_data", nativeQuery = true)
-    void saveUserSnapshot(@Param("userId") Long userId, @Param("userData") Map<String, Object> userData);
 }

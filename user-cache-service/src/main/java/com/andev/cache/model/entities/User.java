@@ -39,10 +39,6 @@ public class User {
     @Column(name = "expires_at")
     private LocalDateTime expiresAt;
 
-    @Column(name = "user_data", columnDefinition = "jsonb")
-    @Convert(converter = JsonMapConverter.class)
-    private Map<String, Object> userData;
-
     @PrePersist
     protected void onCreate() {
         LocalDateTime now = LocalDateTime.now();
