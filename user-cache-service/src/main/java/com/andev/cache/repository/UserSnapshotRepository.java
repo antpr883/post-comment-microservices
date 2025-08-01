@@ -15,15 +15,7 @@ import java.util.Optional;
 @Repository
 public interface UserSnapshotRepository extends JpaRepository<User, Long> {
     
-    /**
-     * Finds user by username.
-     * 
-     * @param username the username to search for
-     * @return Optional containing User if found, empty otherwise
-     */
-    @Query("SELECT u FROM User u WHERE u.username = :username")
-    Optional<User> findByUsername(@Param("username") String username);
-    
+
     /**
      * Deletes expired users from the database.
      * 
@@ -34,17 +26,12 @@ public interface UserSnapshotRepository extends JpaRepository<User, Long> {
     @Query("DELETE FROM User u WHERE u.expiresAt < :expirationTime")
     int deleteExpiredUsers(@Param("expirationTime") LocalDateTime expirationTime);
 
-    /**
-     * Find user data as Map by ID
-     */
-    @Query("SELECT u FROM User u WHERE u.userId = :userId")
-    Optional<User> findUserById(@Param("userId") Long userId);
 
     /**
      * Find user data as Map by ID (legacy method for compatibility)
      */
     default Map<String, Object> findUserDataById(Long userId) {
-        return findUserById(userId)
+        return findById(userId)
                 .map(user -> {
                     // Fallback to basic fields if userData is not available
                     Map<String, Object> userData = new HashMap<>();
