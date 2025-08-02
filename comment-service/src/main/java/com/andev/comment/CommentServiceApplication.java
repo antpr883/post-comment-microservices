@@ -1,8 +1,9 @@
 package com.andev.comment;
 
-import com.andev.comment.config.envloader.EnvLoader;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+
+import com.andev.comment.config.envloader.EnvLoader;
 
 @SpringBootApplication
 public class CommentServiceApplication {

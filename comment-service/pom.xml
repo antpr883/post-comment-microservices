@@ -31,6 +31,7 @@
             <artifactId>user-cache-service</artifactId>
             <version>v1.1</version>
         </dependency>
+
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
