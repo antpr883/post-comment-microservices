@@ -25,8 +25,8 @@ public class EnvLoader {
         String filename = profile + ".env";
 
         Dotenv dotenv = Dotenv.configure()
-                .filename("comment-service/" + filename)
-                // .filename(filename)
+                // .filename("comment-service/" + filename)
+                .filename(filename)
                 .ignoreIfMissing()
                 .load();
 
