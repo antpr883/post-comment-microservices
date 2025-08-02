@@ -15,16 +15,16 @@ import java.time.Duration;
 public class CacheServiceProperties {
     
     // Database Configuration
-    @Value("${spring.snapshot-datasource.url}")
+    @Value("${spring.snapshot-datasource.url:jdbc:postgresql://localhost:5432/user_snapshot?ssl=false}")
     private String databaseUrl;
     
-    @Value("${spring.snapshot-datasource.username}")
+    @Value("${spring.snapshot-datasource.username:snap_user}")
     private String databaseUsername;
     
-    @Value("${spring.snapshot-datasource.password}")
+    @Value("${spring.snapshot-datasource.password:1234}")
     private String databasePassword;
     
-    @Value("${spring.snapshot-datasource.driver-class-name}")
+    @Value("${spring.snapshot-datasource.driver-class-name:org.postgresql.Driver}")
     private String databaseDriverClassName;
     
     @Value("${spring.snapshot-datasource.hikari.maximum-pool-size:5}")
@@ -37,16 +37,16 @@ public class CacheServiceProperties {
     private long databaseConnectionTimeout;
     
     // Redis Configuration
-    @Value("${spring.redis.host}")
+    @Value("${spring.redis.host:localhost}")
     private String redisHost;
     
-    @Value("${spring.redis.port}")
+    @Value("${spring.redis.port:6379}")
     private int redisPort;
     
     @Value("${spring.redis.password:}")
     private String redisPassword;
     
-    @Value("${spring.redis.database}")
+    @Value("${spring.redis.database:0}")
     private int redisDatabase;
     
     @Value("${spring.redis.timeout:2000ms}")
