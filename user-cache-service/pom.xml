@@ -6,7 +6,7 @@
 
     <groupId>com.andev.cache</groupId>
     <artifactId>user-cache-service</artifactId>
-    <version>v1.2</version>
+    <version>v0.1</version>
     <name>user-cache-service</name>
     <description>user-cache-service</description>
 
