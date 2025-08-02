@@ -27,9 +27,14 @@ public final class CacheUtils {
             String errorMessage, 
             T defaultValue) {
         try {
-            return operation.get();
+            T result = operation.get();
+            log.debug("✅ Cache operation completed successfully");
+            return result;
         } catch (Exception e) {
-            log.error("{}: {}", errorMessage, e.getMessage());
+            log.error("❌ Cache operation failed - {}: {}", errorMessage, e.getMessage());
+            if (log.isDebugEnabled()) {
+                log.debug("❌ Stack trace:", e);
+            }
             return defaultValue;
         }
     }
@@ -45,8 +50,12 @@ public final class CacheUtils {
             String errorMessage) {
         try {
             operation.run();
+            log.debug("✅ Cache operation completed successfully");
         } catch (Exception e) {
-            log.error("{}: {}", errorMessage, e.getMessage());
+            log.error("❌ Cache operation failed - {}: {}", errorMessage, e.getMessage());
+            if (log.isDebugEnabled()) {
+                log.debug("❌ Stack trace:", e);
+            }
         }
     }
 
@@ -62,10 +71,40 @@ public final class CacheUtils {
             Supplier<T> operation, 
             String errorMessage) {
         try {
-            return operation.get();
+            T result = operation.get();
+            log.debug("✅ Cache operation completed successfully");
+            return result;
         } catch (Exception e) {
-            log.error("{}: {}", errorMessage, e.getMessage());
+            log.error("❌ Cache operation failed - {}: {}", errorMessage, e.getMessage());
+            if (log.isDebugEnabled()) {
+                log.debug("❌ Stack trace:", e);
+            }
             throw new RuntimeException(errorMessage, e);
+        }
+    }
+
+    /**
+     * Executes a cache operation with timing information.
+     * 
+     * @param operation operation to execute
+     * @param operationName name of the operation for logging
+     * @param defaultValue default value to return on error
+     * @return result of operation or default value
+     */
+    public static <T> T executeWithTiming(
+            Supplier<T> operation, 
+            String operationName, 
+            T defaultValue) {
+        long startTime = System.currentTimeMillis();
+        try {
+            T result = operation.get();
+            long duration = System.currentTimeMillis() - startTime;
+            log.debug("⏱️ {} completed in {}ms", operationName, duration);
+            return result;
+        } catch (Exception e) {
+            long duration = System.currentTimeMillis() - startTime;
+            log.error("❌ {} failed after {}ms: {}", operationName, duration, e.getMessage());
+            return defaultValue;
         }
     }
 } 

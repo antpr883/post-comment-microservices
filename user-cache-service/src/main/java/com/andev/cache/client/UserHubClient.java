@@ -33,7 +33,7 @@ public class UserHubClient {
      */
     public Optional<Map<String, Object>> getUserSummary(Long userId) {
         try {
-            log.debug("Fetching user summary from User Hub for userId: {}", userId);
+            log.debug("🌐 Fetching user summary from User Hub for userId: {}", userId);
             
             String url = baseUrl + "/api/users/" + userId;
             UserSummary response = restTemplate.getForObject(url, UserSummary.class);
@@ -43,18 +43,18 @@ public class UserHubClient {
                 userData.put("userId", response.getId());
                 userData.put("username", response.getUsername());
                 
-                log.info("Successfully fetched user summary for userId: {}", userId);
+                log.debug("✅ Successfully fetched user summary for userId: {}", userId);
                 return Optional.of(userData);
             } else {
-                log.warn("User Hub returned null response for userId: {}", userId);
+                log.warn("⚠️ User Hub returned null response for userId: {}", userId);
                 return Optional.empty();
             }
             
         } catch (ResourceAccessException e) {
-            log.error("Failed to connect to User Hub service for userId {}: {}", userId, e.getMessage());
+            log.error("❌ Failed to connect to User Hub service for userId {}: {}", userId, e.getMessage());
             return Optional.empty();
         } catch (Exception e) {
-            log.error("Error fetching user summary for userId {}: {}", userId, e.getMessage());
+            log.error("❌ Error fetching user summary for userId {}: {}", userId, e.getMessage());
             return Optional.empty();
         }
     }

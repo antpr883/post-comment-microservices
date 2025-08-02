@@ -1,8 +1,12 @@
-package com.andev.post.config.envloader;
+package com.andev.comment.config.envloader;
 
 import io.github.cdimascio.dotenv.Dotenv;
 import lombok.extern.slf4j.Slf4j;
 
+/**
+ * Environment loader for comment-service.
+ * Loads environment variables from .env files based on active profile.
+ */
 @Slf4j
 public class EnvLoader {
     static {
@@ -21,8 +25,8 @@ public class EnvLoader {
         String filename = profile + ".env";
 
         Dotenv dotenv = Dotenv.configure()
+                // .filename("comment-service/" + filename)
                 .filename(filename)
-                // .filename("post-service/" + filename)
                 .ignoreIfMissing()
                 .load();
 

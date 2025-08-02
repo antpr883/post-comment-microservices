@@ -23,8 +23,25 @@ public final class UserCacheUtils {
      * @return user ID or null if not found
      */
     public static Long extractUserId(Map<String, Object> userData) {
+        if (userData == null) {
+            log.warn("❌ Cannot extract user ID from null user data");
+            return null;
+        }
+        
         Object userId = userData.get(UserCacheFields.USER_ID);
-        return userId instanceof Long ? (Long) userId : null;
+        if (userId == null) {
+            log.warn("❌ User ID is null in user data");
+            return null;
+        }
+        
+        if (userId instanceof Long) {
+            return (Long) userId;
+        } else if (userId instanceof Number) {
+            return ((Number) userId).longValue();
+        } else {
+            log.warn("❌ User ID is not a valid number: {}", userId);
+            return null;
+        }
     }
 
     /**
@@ -34,8 +51,28 @@ public final class UserCacheUtils {
      * @return username or null if not found
      */
     public static String extractUsername(Map<String, Object> userData) {
+        if (userData == null) {
+            log.warn("❌ Cannot extract username from null user data");
+            return null;
+        }
+        
         Object username = userData.get(UserCacheFields.USERNAME);
-        return username instanceof String ? (String) username : null;
+        if (username == null) {
+            log.warn("❌ Username is null in user data");
+            return null;
+        }
+        
+        if (username instanceof String) {
+            String usernameStr = (String) username;
+            if (usernameStr.trim().isEmpty()) {
+                log.warn("❌ Username is empty in user data");
+                return null;
+            }
+            return usernameStr;
+        } else {
+            log.warn("❌ Username is not a string: {}", username);
+            return null;
+        }
     }
 
     /**
@@ -46,7 +83,7 @@ public final class UserCacheUtils {
      */
     public static boolean isValidUserData(Map<String, Object> userData) {
         if (userData == null) {
-            log.warn("User data is null");
+            log.warn("❌ User data is null");
             return false;
         }
         
@@ -54,15 +91,16 @@ public final class UserCacheUtils {
         String username = extractUsername(userData);
         
         if (userId == null) {
-            log.warn("User ID is missing or invalid in user data");
+            log.warn("❌ User ID is missing or invalid in user data");
             return false;
         }
         
         if (username == null || username.trim().isEmpty()) {
-            log.warn("Username is missing or empty in user data for userId: {}", userId);
+            log.warn("❌ Username is missing or empty in user data for userId: {}", userId);
             return false;
         }
         
+        log.debug("✅ User data validation passed for userId: {}, username: {}", userId, username);
         return true;
     }
 
@@ -76,5 +114,37 @@ public final class UserCacheUtils {
      */
     public static String createLogMessage(String operation, Long userId, String source) {
         return String.format("%s user %d from %s", operation, userId, source);
+    }
+
+    /**
+     * Safely extracts a field from user data map.
+     * 
+     * @param userData user data map
+     * @param fieldName field name to extract
+     * @param defaultValue default value if field is not found
+     * @return field value or default value
+     */
+    public static <T> T extractField(Map<String, Object> userData, String fieldName, T defaultValue) {
+        if (userData == null || fieldName == null) {
+            log.debug("❌ Cannot extract field '{}' from null user data", fieldName);
+            return defaultValue;
+        }
+        
+        Object value = userData.get(fieldName);
+        if (value == null) {
+            log.debug("❌ Field '{}' is null in user data", fieldName);
+            return defaultValue;
+        }
+        
+        try {
+            @SuppressWarnings("unchecked")
+            T result = (T) value;
+            return result;
+        } catch (ClassCastException e) {
+            log.warn("❌ Field '{}' has wrong type: expected {}, got {}", 
+                    fieldName, defaultValue != null ? defaultValue.getClass().getSimpleName() : "null", 
+                    value.getClass().getSimpleName());
+            return defaultValue;
+        }
     }
 } 

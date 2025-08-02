@@ -32,21 +32,20 @@ public class DatabaseUserCacheServiceImpl implements DatabaseUserCacheService {
 
     @Override
     public Optional<Map<String, Object>> getUserById(Long userId) {
-        log.info("🔍 DATABASE CACHE: Looking for user with ID: {} in database", userId);
-        log.info("🔍 DATABASE CACHE: Using repository: {}", userSnapshotRepository.getClass().getSimpleName());
+        log.debug("🔍 Looking for user with ID: {} in database", userId);
         
         return CacheUtils.executeWithErrorHandling(
                 () -> {
-                    log.info("🔍 DATABASE CACHE: Executing findById({}) query", userId);
+                    log.debug("🔍 Executing findById({}) query", userId);
                     Optional<User> userOptional = userSnapshotRepository.findById(userId);
                     
                     if (userOptional.isPresent()) {
                         User user = userOptional.get();
-                        log.info("✅ DATABASE CACHE: Found user in database - ID: {}, Username: {}, CachedAt: {}, ExpiresAt: {}", 
+                        log.debug("✅ Found user in database - ID: {}, Username: {}, CachedAt: {}, ExpiresAt: {}", 
                                 user.getUserId(), user.getUsername(), user.getCachedAt(), user.getExpiresAt());
                         return Optional.of(convertUserToMap(user));
                     } else {
-                        log.warn("❌ DATABASE CACHE: User with ID {} not found in database", userId);
+                        log.debug("❌ User with ID {} not found in database", userId);
                         return Optional.empty();
                     }
                 },
@@ -62,7 +61,7 @@ public class DatabaseUserCacheServiceImpl implements DatabaseUserCacheService {
                 () -> {
                     User user = createUserFromData(userData);
                     userSnapshotRepository.save(user);
-                    log.debug("Cached user {} in database with TTL {} hours", 
+                    log.debug("💾 Cached user {} in database with TTL {} hours", 
                             user.getUserId(), properties.getDatabaseTtl().toHours());
                     return null;
                 },
@@ -76,7 +75,7 @@ public class DatabaseUserCacheServiceImpl implements DatabaseUserCacheService {
         CacheUtils.executeWithErrorHandling(
                 () -> {
                     userSnapshotRepository.deleteById(userId);
-                    log.debug("Evicted user {} from database cache", userId);
+                    log.debug("🗑️ Evicted user {} from database cache", userId);
                 },
                 "Failed to evict user from database"
         );
@@ -98,7 +97,7 @@ public class DatabaseUserCacheServiceImpl implements DatabaseUserCacheService {
                 () -> {
                     LocalDateTime expirationTime = LocalDateTime.now();
                     userSnapshotRepository.deleteExpiredUsers(expirationTime);
-                    log.debug("Cleaned up expired data from database cache");
+                    log.debug("🧹 Cleaned up expired data from database cache");
                 },
                 "Failed to cleanup expired data from database"
         );

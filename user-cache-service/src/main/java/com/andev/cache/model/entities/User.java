@@ -7,7 +7,10 @@ import org.slf4j.LoggerFactory;
 
 import java.time.LocalDateTime;
 
-
+/**
+ * JPA Entity representing user data stored in the snapshot database.
+ * Used for caching user information with TTL support.
+ */
 @Entity
 @Table(
         name = "users",
@@ -45,13 +48,13 @@ public class User {
 
         if (cachedAt == null) {
             cachedAt = now;
-            log.debug("Setting cache start date for author {} to {}", userId, cachedAt);
+            log.debug("Setting cache start date for user {} to {}", userId, cachedAt);
         }
 
         if (expiresAt == null) {
             // Default 6 hours cache TTL
             expiresAt = now.plusHours(6);
-            log.debug("Setting cache end date for author {} to {}", userId, expiresAt);
+            log.debug("Setting cache end date for user {} to {}", userId, expiresAt);
         }
     }
 }

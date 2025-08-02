@@ -1,6 +1,5 @@
 package com.andev.cache.config;
 
-
 import com.andev.cache.client.UserHubClient;
 import com.andev.cache.config.jpa.SnapshotRepositoryConfiguration;
 import com.andev.cache.repository.snapshot.UserSnapshotRepository;
@@ -98,10 +97,11 @@ public class CacheServiceAutoConfiguration {
 
     public static class UserCacheInitializer {
         public UserCacheInitializer(CacheServiceProperties properties) {
-            log.info("Initializing user cache service with Redis and PostgreSQL support");
-            log.info("Database: {}", properties.getDatabaseUrl());
-            log.info("Redis: {}:{}", properties.getRedisHost(), properties.getRedisPort());
-            log.info("User Service: {}", properties.getUserServiceBaseUrl());
+            log.info("🚀 Initializing user cache service:");
+            log.info("   📊 Database: {}", properties.getDatabaseUrl());
+            log.info("   🔴 Redis: {}:{}", properties.getRedisHost(), properties.getRedisPort());
+            log.info("   🌐 User Service: {}", properties.getUserServiceBaseUrl());
+            log.info("   ⚡ Features: Bulk Operations, Pipeline, Optimized Logging");
         }
     }
 }

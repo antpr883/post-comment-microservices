@@ -1,0 +1,79 @@
+# Development Profile Configuration
+spring:
+  # MongoDB Configuration
+  data:
+    mongodb:
+      host: localhost
+      port: 27017
+      database: commentdb
+      # username: comment_user
+      # password: 1234
+      # authentication-database: admin
+      auto-index-creation: true
+
+  # Redis Configuration
+  redis:
+    host: localhost
+    port: 6379
+    password: 
+    database: 0
+    timeout: 2000ms
+    lettuce:
+      pool:
+        max-active: 8
+        max-idle: 8
+        min-idle: 0
+        max-wait: -1ms
+
+  # Liquibase Configuration
+  liquibase:
+    enabled: false  # Disable Liquibase for MongoDB
+    change-log: classpath:db/changelog/db.changelog-master.xml
+    contexts: dev
+    drop-first: false
+
+  # User Cache Service Configuration
+  snapshot-datasource:
+    url: jdbc:postgresql://localhost:5432/user_snapshot?ssl=false
+    driver-class-name: org.postgresql.Driver
+    username: snap_user
+    password: 1234
+    hikari:
+      maximum-pool-size: 5
+      minimum-idle: 1
+      connection-timeout: 10000
+
+cache:
+  redis:
+    key-prefix: "user:"
+    ttl: PT30M
+  database:
+    ttl: PT6H
+  user-service:
+    base-url: http://localhost:8081
+
+# Logging Configuration
+logging:
+  level:
+    com.comment.service: DEBUG
+    org.springframework.data.mongodb: DEBUG
+    org.springframework.data.redis: DEBUG
+    com.user.cache.service: DEBUG
+    org.liquibase: INFO
+    org.springframework.boot.autoconfigure.liquibase: DEBUG
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+
+# Server Configuration
+server:
+  port: 8082
+
+# Management endpoints
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      show-details: always 

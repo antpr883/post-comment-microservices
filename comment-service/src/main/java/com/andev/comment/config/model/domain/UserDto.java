@@ -1,21 +1,21 @@
-package com.andev.cache.model.domain.dto;
-
-import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.*;
+package com.andev.comment.config.model.domain;
 
 import java.io.Serializable;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+import lombok.*;
 
 /**
  * Data Transfer Object for User information used in caching operations.
  * This DTO represents user data that flows between Redis, PostgreSQL, and User Service API.
  */
 @Data
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder(toBuilder = true)
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @ToString(onlyExplicitlyIncluded = true)
-public class UserCacheDto implements Serializable {
+@AllArgsConstructor
+@NoArgsConstructor
+public class UserDto implements Serializable {
 
     @JsonProperty("userId")
     @EqualsAndHashCode.Include
@@ -25,4 +25,4 @@ public class UserCacheDto implements Serializable {
     @JsonProperty("username")
     @ToString.Include
     private String username;
-} 
+}

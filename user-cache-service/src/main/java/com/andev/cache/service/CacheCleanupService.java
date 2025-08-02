@@ -23,19 +23,19 @@ public class CacheCleanupService {
      */
     @Scheduled(cron = "${user-cache.cleanup.cron:0 0 2 * * ?}")
     public void cleanupExpiredData() {
-        log.info("Starting scheduled cleanup of expired cache data");
+        log.info("🧹 Starting scheduled cleanup of expired cache data");
         
         redisUserCacheService.cleanupExpiredData();
         databaseUserCacheService.cleanupExpiredData();
         
-        log.info("Completed scheduled cleanup of expired cache data");
+        log.info("✅ Completed scheduled cleanup of expired cache data");
     }
 
     /**
      * Manual cleanup method that can be called on demand.
      */
     public void manualCleanup() {
-        log.info("Starting manual cleanup of expired cache data");
+        log.info("🧹 Starting manual cleanup of expired cache data");
         cleanupExpiredData();
     }
 } 

@@ -1,61 +1,91 @@
 package com.andev.cache.service;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
 /**
- * Сервіс для кешування даних користувачів.
- * Реалізує повне флоу кешування: Redis -> PostgreSQL -> External API
- * Повертає дані у вигляді Map для уникнення залежностей від конкретних DTO.
+ * Service for caching user data.
+ * Implements complete caching flow: Redis -> PostgreSQL -> External API
+ * Returns data as Map to avoid dependencies on specific DTOs.
  */
 public interface UserCacheService {
     
     /**
-     * Отримує дані користувача за ID з повним флоу кешування.
-     * 1. Перевіряє Redis (гарячий кеш)
-     * 2. Перевіряє PostgreSQL (теплий кеш)
-     * 3. Викликає зовнішнє API (холодні дані)
+     * Retrieves user data by ID with complete caching flow.
+     * 1. Check Redis (hot cache)
+     * 2. Check PostgreSQL (warm cache)
+     * 3. Call external API (cold data)
      * 
-     * @param userId ID користувача
-     * @return Optional з Map даних користувача або empty якщо не знайдено
+     * @param userId user ID
+     * @return Optional with Map of user data or empty if not found
      */
     Optional<Map<String, Object>> getUserById(Long userId);
     
     /**
-     * Отримує дані користувача за username.
+     * Bulk operation to retrieve multiple users.
      * 
-     * @param username ім'я користувача
-     * @return Optional з Map даних користувача або empty якщо не знайдено
+     * @param userIds list of user IDs
+     * @return Map with userId -> Optional of user data
+     */
+    Map<Long, Optional<Map<String, Object>>> getUsersByIds(List<Long> userIds);
+    
+    /**
+     * Retrieves user data by username.
+     * 
+     * @param username username
+     * @return Optional with Map of user data or empty if not found
      */
     Optional<Map<String, Object>> getUserByUsername(String username);
     
     /**
-     * Кешує дані користувача в Redis та PostgreSQL.
+     * Caches user data in Redis and PostgreSQL.
      * 
-     * @param userData Map з даними користувача
+     * @param userData Map with user data
      */
     void cacheUser(Map<String, Object> userData);
     
     /**
-     * Видаляє користувача з Redis та PostgreSQL кешу.
+     * Bulk operation to cache multiple users.
      * 
-     * @param userId ID користувача для видалення
+     * @param usersData list of Maps with user data
+     */
+    void cacheUsers(List<Map<String, Object>> usersData);
+    
+    /**
+     * Removes user from Redis and PostgreSQL cache.
+     * 
+     * @param userId user ID to remove
      */
     void evictUser(Long userId);
     
     /**
-     * Перевіряє чи є користувач в Redis кеші.
+     * Bulk operation to remove multiple users.
      * 
-     * @param userId ID користувача
-     * @return true якщо користувач є в Redis кеші, false інакше
+     * @param userIds list of user IDs to remove
+     */
+    void evictUsers(List<Long> userIds);
+    
+    /**
+     * Checks if user is cached in Redis.
+     * 
+     * @param userId user ID
+     * @return true if user is cached in Redis, false otherwise
      */
     boolean isUserCachedInRedis(Long userId);
     
     /**
-     * Перевіряє чи є користувач в PostgreSQL кеші.
+     * Checks if user is cached in PostgreSQL.
      * 
-     * @param userId ID користувача
-     * @return true якщо користувач є в PostgreSQL кеші, false інакше
+     * @param userId user ID
+     * @return true if user is cached in PostgreSQL, false otherwise
      */
     boolean isUserCachedInDatabase(Long userId);
+    
+    /**
+     * Gets cache statistics.
+     * 
+     * @return Map with cache metrics
+     */
+    Map<String, Object> getCacheStats();
 } 
