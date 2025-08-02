@@ -1,47 +1,51 @@
 # Development Configuration for User Cache Service
-user-cache:
-  enabled: true
-  
-  # Database configuration for development
-  database:
-    url: jdbc:postgresql://localhost:5432/user_cache_dev
-    username: postgres
-    password: postgres
+
+spring:
+  application:
+    name: user-cache-service
+
+  # ========== SNAPSHOT DATABASE ==========
+  snapshot-datasource:
+    url: jdbc:postgresql://localhost:5432/user_snapshot?ssl=false
     driver-class-name: org.postgresql.Driver
+    username: snap_user
+    password: 1234
     hikari:
-      maximum-pool-size: 3
+      maximum-pool-size: 5
       minimum-idle: 1
-      connection-timeout: 5000
-  
-  # Redis configuration for development
+      connection-timeout: 10000
+
+  # ========== REDIS ==========
   redis:
     host: localhost
     port: 6379
-    password: 
-    database: 1
-    timeout: 1s
+    password:
+    database: 0
+    timeout: 2000ms
     lettuce:
       pool:
-        max-active: 4
+        max-active: 8
+        max-idle: 8
         min-idle: 0
-  
-  # Cache configuration for development
-  cache:
-    redis-key-prefix: "dev:user:"
-    redis-ttl: 15m
-    database-ttl: 2h
-    user-service-base-url: http://localhost:8081
-  
-  # Cleanup configuration for development
-  cleanup:
-    cron: "0 */30 * * * ?"  # Every 30 minutes
-    batch-size: 50
+        max-wait: -1ms
 
-# Development logging
+# ========== CACHE CONFIGURATION ==========
+cache:
+  redis:
+    key-prefix: "user:"
+    ttl: PT30M
+
+  database:
+    ttl: PT6H
+
+  user-service:
+    base-url: http://localhost:8081
+
+# ========== LOGGING ==========
 logging:
   level:
-    com.andev.cache: DEBUG
+    com.user.cache.service: DEBUG
     org.springframework.data.redis: DEBUG
-    org.hibernate.SQL: DEBUG
-    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
-    org.springframework.web.client.RestTemplate: DEBUG 
+    org.springframework.jdbc: DEBUG
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n" 

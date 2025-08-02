@@ -17,6 +17,29 @@ spring:
       minimum-idle: 2
       connection-timeout: 10000
 
+  # ========== SNAPSHOT DATABASE (for user cache service) ==========
+  snapshot-datasource:
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/user_snapshot?${DB_PARAMS:ssl=false}
+    driver-class-name: ${DB_DRIVER:org.postgresql.Driver}
+    username: snap_user
+    password: 1234
+    hikari:
+      maximum-pool-size: 5
+      minimum-idle: 1
+      connection-timeout: 10000
+
+  # ========== REDIS (for user cache service) ==========
+  redis:
+    host: ${REDIS_HOST:localhost}
+    port: ${REDIS_PORT:6379}
+    password: ${REDIS_PASSWORD:}
+    database: ${REDIS_DATABASE:0}
+    timeout: 2000ms
+    lettuce:
+      pool:
+        max-active: 8
+        min-idle: 0
+
   # ========== JPA (PRIMARY) ==========
   jpa:
     open-in-view: false
@@ -44,6 +67,21 @@ spring:
     console:
       enabled: false
 
+# ========== USER CACHE SERVICE CONFIGURATION ==========
+user-cache:
+  enabled: true
+  cleanup:
+    cron: 0 0 2 * * ?
+    batch-size: 100
+
+cache:
+  redis:
+    key-prefix: "user:"
+    ttl: PT30M
+  database:
+    ttl: PT6H
+  user-service:
+    base-url: ${USER_SERVICE_BASE_URL:http://localhost:8082}
 
 # ========== LOGGING ==========
 logging:

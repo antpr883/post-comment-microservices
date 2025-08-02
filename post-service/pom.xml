@@ -30,7 +30,7 @@
 		<dependency>
 			<groupId>com.andev.cache</groupId>
 			<artifactId>user-cache-service</artifactId>
-			<version>0.0.4-SNAPSHOT</version>
+			<version>v1.0</version>
 		</dependency>
 
 		<dependency>

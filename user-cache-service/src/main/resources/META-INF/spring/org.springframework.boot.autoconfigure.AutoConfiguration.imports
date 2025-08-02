@@ -1,1 +1,1 @@
-com.andev.cache.config.redis.UserCacheAutoConfiguration
+com.andev.cache.config.CacheServiceAutoConfiguration

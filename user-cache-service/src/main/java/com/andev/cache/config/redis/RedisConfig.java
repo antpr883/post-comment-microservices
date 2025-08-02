@@ -1,12 +1,7 @@
 package com.andev.cache.config.redis;
 
-import com.andev.cache.config.UserCacheProperties;
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.jsontype.impl.LaissezFaireSubTypeValidator;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.andev.cache.config.CacheServiceProperties;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -17,36 +12,27 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
-@Slf4j
+/**
+ * Redis configuration for User Cache Service.
+ * Provides Redis connection factory and template for caching user data.
+ */
 @Configuration
 @RequiredArgsConstructor
 @ConditionalOnProperty(name = "user-cache.enabled", havingValue = "true", matchIfMissing = true)
 public class RedisConfig {
 
-    private final UserCacheProperties properties;
+    private final CacheServiceProperties properties;
 
     @Bean
     public RedisConnectionFactory redisConnectionFactory() {
-        UserCacheProperties.Redis redisConfig = properties.getRedis();
-        
-        log.info("=== CREATING REDIS CONNECTION FACTORY ===");
-        log.info("Redis host: {}", redisConfig.getHost());
-        log.info("Redis port: {}", redisConfig.getPort());
-        log.info("Redis database: {}", redisConfig.getDatabase());
-        log.info("Redis timeout: {}", redisConfig.getTimeout());
-        log.info("Redis password: {}", redisConfig.getPassword() != null && !redisConfig.getPassword().isEmpty() ? "***" : "none");
-        
         RedisStandaloneConfiguration config = new RedisStandaloneConfiguration();
-        config.setHostName(redisConfig.getHost());
-        config.setPort(redisConfig.getPort());
-        config.setDatabase(redisConfig.getDatabase());
+        config.setHostName(properties.getRedisHost());
+        config.setPort(properties.getRedisPort());
+        config.setDatabase(properties.getRedisDatabase());
         
-        if (redisConfig.getPassword() != null && !redisConfig.getPassword().isEmpty()) {
-            config.setPassword(redisConfig.getPassword());
+        if (properties.getRedisPassword() != null && !properties.getRedisPassword().isEmpty()) {
+            config.setPassword(properties.getRedisPassword());
         }
-        
-        log.info("Redis configuration created successfully");
-        log.info("=== REDIS CONNECTION FACTORY CREATED ===");
         
         return new LettuceConnectionFactory(config);
     }
@@ -55,28 +41,17 @@ public class RedisConfig {
     public RedisTemplate<String, Object> redisTemplate(RedisConnectionFactory connectionFactory) {
         RedisTemplate<String, Object> template = new RedisTemplate<>();
         template.setConnectionFactory(connectionFactory);
-
-        // Configure serializers
-        StringRedisSerializer stringSerializer = new StringRedisSerializer();
-        GenericJackson2JsonRedisSerializer jsonSerializer = createJsonSerializer();
-
-        template.setKeySerializer(stringSerializer);
+        
+        // Use String serializer for keys
+        template.setKeySerializer(new StringRedisSerializer());
+        template.setHashKeySerializer(new StringRedisSerializer());
+        
+        // Use JSON serializer for values
+        GenericJackson2JsonRedisSerializer jsonSerializer = new GenericJackson2JsonRedisSerializer();
         template.setValueSerializer(jsonSerializer);
-        template.setHashKeySerializer(stringSerializer);
         template.setHashValueSerializer(jsonSerializer);
-
+        
         template.afterPropertiesSet();
         return template;
-    }
-
-    private GenericJackson2JsonRedisSerializer createJsonSerializer() {
-        ObjectMapper mapper = new ObjectMapper();
-        mapper.registerModule(new JavaTimeModule());
-        mapper.activateDefaultTyping(
-                LaissezFaireSubTypeValidator.instance,
-                ObjectMapper.DefaultTyping.NON_FINAL,
-                JsonTypeInfo.As.PROPERTY
-        );
-        return new GenericJackson2JsonRedisSerializer(mapper);
     }
 } 

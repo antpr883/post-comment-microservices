@@ -1,59 +1,16 @@
-# User Cache Service Configuration
-user-cache:
-  enabled: true
+# User Cache Service - Main Configuration
+# This is the entry point for the application configuration
 
-  # Database configuration for user snapshots
-  database:
-    url: jdbc:postgresql://localhost:5433/user_snapshot
-    username: snap_user
-    password: 1234
-    driver-class-name: org.postgresql.Driver
-    hikari:
-      maximum-pool-size: 5
-      minimum-idle: 1
-      connection-timeout: 10000
-
-  # Redis configuration for caching
-  redis:
-    host: localhost
-    port: 6379
-    password:
-    database: 0
-    timeout: 2s
-    lettuce:
-      pool:
-        max-active: 8
-        min-idle: 0
-
-  # Cache configuration
-  cache:
-    redis-key-prefix: "user:"
-    redis-ttl: 30m
-    database-ttl: 6h
-    user-service-base-url: http://localhost:8081
-
-  # Cleanup configuration
-  cleanup:
-    cron: "0 0 2 * * ?"
-    batch-size: 100
-
-# Spring Data Redis configuration (alternative way)
 spring:
-  data:
-    redis:
-      host: localhost
-      port: 6379
-      database: 0
-      timeout: 2s
-      lettuce:
-        pool:
-          max-active: 8
-          min-idle: 0
+  profiles:
+    active: dev
+  main:
+    allow-bean-definition-overriding: true
+    allow-circular-references: true
 
-# Logging configuration
-logging:
-  level:
-    com.andev.cache: DEBUG
-    org.springframework.data.redis: INFO
-    org.hibernate.SQL: DEBUG
-    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+# Import specific configuration files
+---
+spring:
+  config:
+    import:
+      - optional:classpath:/application-${spring.profiles.active}.yml

@@ -6,12 +6,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.time.LocalDateTime;
-import java.util.Map;
 
 
 @Entity
 @Table(
         name = "users",
+        schema = "v1_snap_user",
         indexes = {@Index(name = "idx_users_user_id", columnList = "user_id", unique = true)})
 @Getter
 @Setter
