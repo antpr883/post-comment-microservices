@@ -7,8 +7,6 @@ public interface BaseService<D extends DtoMarker, R extends DtoMarker> {
 
     AppResponse<D> create(R requestDto);
 
-    AppResponse<D> update(Long id, R requestDto);
-
     AppResponse<D> delete(Long id);
 
     AppResponse<D> softDelete(Long id);

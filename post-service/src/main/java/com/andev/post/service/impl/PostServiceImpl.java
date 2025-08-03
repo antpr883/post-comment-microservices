@@ -2,9 +2,9 @@ package com.andev.post.service.impl;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,8 +15,10 @@ import com.andev.post.model.constants.ApiErrorMessage;
 import com.andev.post.model.domain.dto.PostDto;
 import com.andev.post.model.domain.dto.UserDto;
 import com.andev.post.model.domain.dto.request.PostRequestDto;
+import com.andev.post.model.domain.dto.request.PostUpdateRequestDto;
 import com.andev.post.model.domain.mapper.PostMapper;
 import com.andev.post.model.entities.Post;
+import com.andev.post.model.enums.PostStatus;
 import com.andev.post.repository.PostRepository;
 import com.andev.post.service.PostService;
 import com.andev.post.web.response.AppResponse;
@@ -38,79 +40,184 @@ public class PostServiceImpl implements PostService {
     private UserCacheService userCacheService;
 
     @Override
-    public AppResponse<PostDto> findById(Long id) {
-        Post post = postRepository
-                .findById(id)
-                .orElseThrow(() -> new NotFoundException(ApiErrorMessage.RESOURCE_NOT_FOUND_BY_ID.getMessage(id)));
+    @Transactional
+    public AppResponse<PostDto> create(PostRequestDto requestDto) {
+        log.debug("Creating post with title: {}", requestDto.getTitle());
+        Post post = postMapper.toEntity(requestDto);
+        post.setPostStatus(PostStatus.ACTIVE); // Default status
+        Post savedPost = postRepository.save(post);
+        PostDto dto = postMapper.toDto(savedPost);
+        enrichWithUserData(dto, savedPost.getAuthorId());
+        log.info("Created post with ID: {}", savedPost.getId());
+        return AppResponse.successful(dto);
+    }
 
+    @Override
+    @Transactional
+    public AppResponse<PostDto> update(Long id, PostUpdateRequestDto postUpdateRequestDto) {
+        log.debug("Updating post with ID: {}", id);
+        Post post = findPostById(id);
+        postMapper.updateEntity(postUpdateRequestDto, post); // Only updates present fields
+        Post updatedPost = postRepository.save(post);
+        PostDto dto = postMapper.toDto(updatedPost);
+        enrichWithUserData(dto, updatedPost.getAuthorId());
+        log.info("Updated post with ID: {}", id);
+        return AppResponse.successful(dto);
+    }
+
+    @Override
+    @Transactional
+    public AppResponse<PostDto> delete(Long id) {
+        Post post = findPostById(id);
+        postRepository.delete(post);
+        log.info("Hard-deleted post ID: {}", id);
         PostDto dto = postMapper.toDto(post);
+        return AppResponse.successful(dto);
+    }
 
-        // Try to get user data from cache if available
-        if (post.getAuthorId() != null && userCacheService != null) {
-            Optional<Map<String, Object>> userData = userCacheService.getUserById(post.getAuthorId());
-            if (userData.isPresent()) {
-                log.info("User data found in cache for author ID: {}", post.getAuthorId());
-                Object userIdObj = userData.get().get("userId");
-                Long userId = null;
-                if (userIdObj instanceof Integer) {
-                    userId = ((Integer) userIdObj).longValue();
-                } else if (userIdObj instanceof Long) {
-                    userId = (Long) userIdObj;
-                }
+    @Override
+    @Transactional
+    public AppResponse<PostDto> softDelete(Long id) {
+        Post post = findPostById(id);
+        post.setPostStatus(PostStatus.DELETED); // Add to enum if missing
+        Post saved = postRepository.save(post);
+        PostDto dto = postMapper.toDto(saved);
+        enrichWithUserData(dto, saved.getAuthorId());
+        log.info("Soft-deleted post ID: {}", id);
+        return AppResponse.successful(dto);
+    }
 
-                UserDto userDto = UserDto.builder()
-                        .userId(userId)
-                        .username((String) userData.get().get("username"))
-                        .build();
-                dto.setUserDto(userDto);
-            } else {
-                log.debug("User data not found in cache for author ID: {}", post.getAuthorId());
-            }
-        }
-
+    @Override
+    public AppResponse<PostDto> findById(Long id) {
+        Post post = findPostById(id);
+        PostDto dto = postMapper.toDto(post);
+        enrichWithUserData(dto, post.getAuthorId());
         return AppResponse.successful(dto);
     }
 
     @Override
     public AppResponse<PaginationResponse<PostDto>> findAll(Pageable pageable) {
-        return null;
+        Page<Post> page = postRepository.findAll(pageable);
+        log.info("Find all pageable posts");
+        return toPaginatedResponse(page);
     }
 
     @Override
     public AppResponse<PaginationResponse<PostDto>> findByAuthorId(Long authorId, Pageable pageable) {
-        return null;
+        Page<Post> page = postRepository.findByAuthorId(authorId, pageable);
+        log.info("Find all pageable posts by author ID: {}", authorId);
+        return toPaginatedResponse(page);
     }
 
     @Override
     public AppResponse<PaginationResponse<PostDto>> findByIds(List<Long> ids, Pageable pageable) {
-        return null;
+        List<Post> posts = postRepository.findByIdsIn(ids);
+
+        // Optionally manual paging logic; here, just slice if needed:
+        int page = pageable.getPageNumber();
+        int limit = pageable.getPageSize();
+        int fromIndex = Math.min(page * limit, posts.size());
+        int toIndex = Math.min(fromIndex + limit, posts.size());
+        List<PostDto> dtos = posts.subList(fromIndex, toIndex).stream()
+                .map(post -> {
+                    PostDto dto = postMapper.toDto(post);
+                    enrichWithUserData(dto, post.getAuthorId());
+                    return dto;
+                })
+                .toList();
+
+        int pages = (int) Math.ceil((double) posts.size() / limit);
+
+        PaginationResponse.Pagination pagination = PaginationResponse.Pagination.builder()
+                .total(posts.size())
+                .limit(limit)
+                .page(page)
+                .pages(pages)
+                .build();
+
+        PaginationResponse<PostDto> response = PaginationResponse.<PostDto>builder()
+                .content(dtos)
+                .pagination(pagination)
+                .build();
+
+        log.info("Find all pageable posts by IDs: {}", ids);
+        return AppResponse.successful(response);
     }
 
     @Override
     public AppResponse<PaginationResponse<PostDto>> findByStatus(String status, Pageable pageable) {
-        return null;
+        PostStatus postStatus = PostStatus.valueOf(status);
+        Page<Post> page = postRepository.findByPostStatus(postStatus, pageable);
+        return toPaginatedResponse(page);
     }
 
     @Override
-    public AppResponse<PostDto> create(PostRequestDto requestDto) {
+    public void updateStatuses(List<Long> ids, String newStatus) {
+        PostStatus postStatus = PostStatus.valueOf(newStatus);
+        int updated = postRepository.updatePostStatuses(ids, postStatus);
+        log.info("Bulk-updated status for {} posts to {}", updated, newStatus);
+    }
+
+    // =================== HELPER METHODS ===================
+    private Post findPostById(Long id) {
+        return postRepository
+                .findById(id)
+                .orElseThrow(() -> new NotFoundException(ApiErrorMessage.RESOURCE_NOT_FOUND_BY_ID.getMessage(id)));
+    }
+
+    private void enrichWithUserData(PostDto dto, Long authorId) {
+        if (authorId == null || userCacheService == null) {
+            return;
+        }
+        try {
+            userCacheService
+                    .getUserById(authorId)
+                    .ifPresentOrElse(
+                            user -> setUserDtoFromCache(dto, user, authorId),
+                            () -> log.debug("User data not found in cache for author ID: {}", authorId));
+        } catch (Exception e) {
+            log.warn("Failed to enrich post with user data for author {}: {}", authorId, e.getMessage());
+        }
+    }
+
+    private void setUserDtoFromCache(PostDto dto, Map<String, Object> user, Long authorId) {
+        Long userId = extractUserId(user.get("userId"));
+        String username = (String) user.get("username");
+        UserDto userDto = UserDto.builder().userId(userId).username(username).build();
+        dto.setUserDto(userDto);
+        log.debug("Enriched post {} with user data for author {}", dto.getId(), authorId);
+    }
+
+    private Long extractUserId(Object userIdObj) {
+        if (userIdObj instanceof Integer) {
+            return ((Integer) userIdObj).longValue();
+        } else if (userIdObj instanceof Long) {
+            return (Long) userIdObj;
+        }
         return null;
     }
 
-    @Override
-    public AppResponse<PostDto> update(Long id, PostRequestDto requestDto) {
-        return null;
-    }
+    private AppResponse<PaginationResponse<PostDto>> toPaginatedResponse(Page<Post> page) {
+        List<PostDto> dtos = page.getContent().stream()
+                .map(post -> {
+                    PostDto dto = postMapper.toDto(post);
+                    enrichWithUserData(dto, post.getAuthorId());
+                    return dto;
+                })
+                .toList();
 
-    @Override
-    public void updateStatuses(List<Long> ids, String newStatus) {}
+        PaginationResponse.Pagination pagination = PaginationResponse.Pagination.builder()
+                .total(page.getTotalElements())
+                .limit(page.getSize())
+                .page(page.getNumber())
+                .pages(page.getTotalPages())
+                .build();
 
-    @Override
-    public AppResponse<PostDto> delete(Long id) {
-        return null;
-    }
+        PaginationResponse<PostDto> response = PaginationResponse.<PostDto>builder()
+                .content(dtos)
+                .pagination(pagination)
+                .build();
 
-    @Override
-    public AppResponse<PostDto> softDelete(Long id) {
-        return null;
+        return AppResponse.successful(response);
     }
 }
