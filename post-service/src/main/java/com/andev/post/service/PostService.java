@@ -23,4 +23,13 @@ public interface PostService extends BaseService<PostDto, PostRequestDto> {
     AppResponse<PostDto> update(Long id, PostUpdateRequestDto requestUpdateDto);
 
     void updateStatuses(List<Long> ids, String newStatus);
+
+    /**
+     * Search posts using RSQL query with pagination support
+     *
+     * @param rsqlQuery RSQL query string (e.g., "title==*test*;authorId==123;description.author==John")
+     * @param pageable pagination parameters
+     * @return paginated response with filtered posts
+     */
+    AppResponse<PaginationResponse<PostDto>> search(String rsqlQuery, Pageable pageable);
 }

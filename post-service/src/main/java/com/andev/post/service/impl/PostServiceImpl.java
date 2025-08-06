@@ -6,6 +6,7 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,6 +23,7 @@ import com.andev.post.model.entities.Post;
 import com.andev.post.model.enums.PostStatus;
 import com.andev.post.repository.PostRepository;
 import com.andev.post.service.PostService;
+import com.andev.post.service.rsql.RsqlParserService;
 import com.andev.post.web.response.AppResponse;
 import com.andev.post.web.response.PaginationResponse;
 
@@ -37,6 +39,7 @@ public class PostServiceImpl implements PostService {
 
     private final PostMapper postMapper;
     private final PostRepository postRepository;
+    private final RsqlParserService<Post> rsqlParserService;
 
     @Autowired(required = false)
     private UserCacheService userCacheService;
@@ -158,6 +161,22 @@ public class PostServiceImpl implements PostService {
         PostStatus postStatus = PostStatus.valueOf(newStatus);
         int updated = postRepository.updatePostStatuses(ids, postStatus);
         log.info("Bulk-updated status for {} posts to {}", updated, newStatus);
+    }
+
+    @Override
+    public AppResponse<PaginationResponse<PostDto>> search(String rsqlQuery, Pageable pageable) {
+        log.debug("Searching posts with RSQL query: {}", rsqlQuery);
+
+        try {
+            Specification<Post> specification = rsqlParserService.parse(rsqlQuery);
+            Page<Post> page = postRepository.findAll(specification, pageable);
+
+            log.info("Found {} posts matching RSQL query: {}", page.getTotalElements(), rsqlQuery);
+            return toPaginatedResponse(page);
+        } catch (Exception e) {
+            log.error("Error parsing RSQL query '{}': {}", rsqlQuery, e.getMessage());
+            throw new IllegalArgumentException("Invalid RSQL query: " + e.getMessage());
+        }
     }
 
     // =================== HELPER METHODS ===================

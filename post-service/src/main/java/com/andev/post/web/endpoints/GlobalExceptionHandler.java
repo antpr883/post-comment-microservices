@@ -63,6 +63,25 @@ public class GlobalExceptionHandler {
     }
 
     /**
+     * Handles IllegalArgumentException for invalid RSQL queries and returns 400 Bad Request.
+     */
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<ErrorResponse> handleIllegalArgumentException(
+            IllegalArgumentException ex, WebRequest request) {
+
+        logStackTrace(ex);
+
+        ErrorResponse errorResponse = new ErrorResponse(
+                LocalDateTime.now(),
+                HttpStatus.BAD_REQUEST.value(),
+                "Bad Request",
+                ex.getMessage(),
+                request.getDescription(false));
+
+        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+    }
+
+    /**
      * Handles general RuntimeException and returns 500 Internal Server Error.
      */
     @ExceptionHandler(RuntimeException.class)

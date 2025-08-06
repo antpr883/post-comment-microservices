@@ -129,4 +129,12 @@ public class PostController implements PostEndpoints {
         postService.updateStatuses(ids, newStatus);
         return ResponseEntity.ok().build();
     }
+
+    @Override
+    public ResponseEntity<AppResponse<PaginationResponse<PostDto>>> searchPosts(
+            String query, int page, int size, String sort) {
+        Pageable pageable = createPageable(page, size, sort);
+        AppResponse<PaginationResponse<PostDto>> posts = postService.search(query, pageable);
+        return ResponseEntity.ok(posts);
+    }
 }

@@ -218,4 +218,92 @@ public interface PostEndpoints {
     ResponseEntity<Void> updatePostStatuses(
             @Parameter(description = "List of post IDs to update", example = "[1, 2, 3]") @RequestParam List<Long> ids,
             @Parameter(description = "New status for the posts", example = "ACTIVE") @RequestParam String newStatus);
+
+    @Operation(
+            summary = "Search posts using RSQL query",
+            description =
+                    "Search posts using RSQL (RESTful Service Query Language) with support for complex filtering, "
+                            + "including JSON field search in description. Examples: "
+                            + "'title==*test*' (title contains 'test'), "
+                            + "'authorId==123' (exact author ID), "
+                            + "'description.author==John' (JSON field search), "
+                            + "'postStatus==ACTIVE;likes>10' (multiple conditions), "
+                            + "'title==*test*;authorId==123;description.author==John' (complex query)")
+    @ApiResponses(
+            value = {
+                @ApiResponse(
+                        responseCode = "200",
+                        description = "Posts found successfully",
+                        content =
+                                @Content(
+                                        mediaType = "application/json",
+                                        schema = @Schema(implementation = AppResponse.class),
+                                        examples =
+                                                @ExampleObject(
+                                                        name = "Success Response",
+                                                        value =
+                                                                """
+                                            {
+                                              "success": true,
+                                              "message": "Posts found successfully",
+                                              "data": {
+                                                "content": [
+                                                  {
+                                                    "id": 1,
+                                                    "title": "Test Post",
+                                                    "content": "This is a test post",
+                                                    "authorId": 123,
+                                                    "postStatus": "ACTIVE",
+                                                    "likes": 15,
+                                                    "description": {
+                                                      "author": "John Doe",
+                                                      "category": "Technology"
+                                                    }
+                                                  }
+                                                ],
+                                                "pagination": {
+                                                  "total": 1,
+                                                  "limit": 10,
+                                                  "page": 0,
+                                                  "pages": 1
+                                                }
+                                              }
+                                            }
+                                            """))),
+                @ApiResponse(
+                        responseCode = "400",
+                        description = "Invalid RSQL query",
+                        content =
+                                @Content(
+                                        mediaType = "application/json",
+                                        schema = @Schema(implementation = AppResponse.class),
+                                        examples =
+                                                @ExampleObject(
+                                                        name = "Invalid Query Response",
+                                                        value =
+                                                                """
+                                            {
+                                              "success": false,
+                                              "message": "Invalid RSQL query: Unsupported operator",
+                                              "data": null
+                                            }
+                                            """)))
+            })
+    @GetMapping("/search")
+    ResponseEntity<AppResponse<PaginationResponse<PostDto>>> searchPosts(
+            @Parameter(
+                            description = "RSQL query string for filtering posts. "
+                                    + "Supported operators: ==, !=, >, >=, <, <=. "
+                                    + "For JSON fields use dot notation: description.author==John. "
+                                    + "Multiple conditions separated by semicolon: title==*test*;authorId==123",
+                            example = "title==*test*;authorId==123;description.author==John")
+                    @RequestParam
+                    String query,
+            @Parameter(description = "Page number (0-based)", example = "0") @RequestParam(defaultValue = "0") int page,
+            @Parameter(description = "Page size", example = "10") @RequestParam(defaultValue = "10") int size,
+            @Parameter(
+                            description = "Sort field and direction (e.g., 'id,asc', 'created,desc', 'title,asc')",
+                            example = "id,asc")
+                    @RequestParam(required = false)
+                    String sort);
 }

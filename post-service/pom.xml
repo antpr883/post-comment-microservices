@@ -24,6 +24,7 @@
 		<lombok-mapstruct-binding.version>0.2.0</lombok-mapstruct-binding.version>
 		<springdoc.version>2.7.0</springdoc.version>
 		<com.diffplug.spotless>2.44.2</com.diffplug.spotless>
+		<cz.jirutka.rsql>2.1.0</cz.jirutka.rsql>
 	</properties>
 
 	<dependencies>
@@ -119,6 +120,12 @@
 			<artifactId>jackson-datatype-jsr310</artifactId>
 		</dependency>
 
+		<!-- RSQL Parser for dynamic querying -->
+		<dependency>
+			<groupId>cz.jirutka.rsql</groupId>
+			<artifactId>rsql-parser</artifactId>
+			<version>${cz.jirutka.rsql}</version>
+		</dependency>
 
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
