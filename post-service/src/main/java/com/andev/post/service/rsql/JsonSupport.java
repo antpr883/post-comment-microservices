@@ -163,4 +163,57 @@ public class JsonSupport {
             return value;
         }
     }
+
+    /**
+     * Builds a predicate for automatic JSON field search.
+     *
+     * This method handles RSQL queries where a JSON field is referenced without a specific key.
+     * For example: description==*first* will search in the 'summary' key of the description field.
+     *
+     * @param root The root entity
+     * @param cb The criteria builder
+     * @param jsonField The JSON field name
+     * @param operator The comparison operator
+     * @param args The arguments for the comparison
+     * @return The predicate for the JSON field search
+     */
+    public static Predicate buildAutoJsonPredicate(
+            Root<?> root, CriteriaBuilder cb, String jsonField, ComparisonOperator operator, List<String> args) {
+        String value = args.get(0);
+
+        // For the description field, search in the 'summary' key
+        Expression<String> jsonExtract =
+                cb.function("jsonb_extract_path_text", String.class, root.get(jsonField), cb.literal("summary"));
+
+        return switch (operator.getSymbol()) {
+            case "==" -> {
+                if (value.startsWith("*") && value.endsWith("*")) {
+                    String pattern = "%" + value.substring(1, value.length() - 1) + "%";
+                    yield cb.like(cb.lower(jsonExtract), pattern.toLowerCase());
+                } else if (value.startsWith("*")) {
+                    String pattern = "%" + value.substring(1);
+                    yield cb.like(cb.lower(jsonExtract), pattern.toLowerCase());
+                } else if (value.endsWith("*")) {
+                    String pattern = value.substring(0, value.length() - 1) + "%";
+                    yield cb.like(cb.lower(jsonExtract), pattern.toLowerCase());
+                } else {
+                    yield cb.equal(jsonExtract, value);
+                }
+            }
+            case "!=" -> {
+                yield cb.notEqual(jsonExtract, value);
+            }
+            case "=in=" -> {
+                CriteriaBuilder.In<String> inClause = cb.in(jsonExtract);
+                args.forEach(inClause::value);
+                yield inClause;
+            }
+            case "=out=" -> {
+                CriteriaBuilder.In<String> inClause = cb.in(jsonExtract);
+                args.forEach(inClause::value);
+                yield cb.not(inClause);
+            }
+            default -> throw new UnsupportedOperationException("Operator not supported for auto JSON: " + operator);
+        };
+    }
 }

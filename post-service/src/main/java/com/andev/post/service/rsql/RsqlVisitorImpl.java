@@ -6,7 +6,11 @@ import cz.jirutka.rsql.parser.ast.*;
 
 public class RsqlVisitorImpl<T> implements RSQLVisitor<Specification<T>, Void> {
 
-    private final GenericRsqlSpecBuilder<T> builder = new GenericRsqlSpecBuilder<>();
+    private final GenericRsqlSpecBuilder<T> builder;
+
+    public RsqlVisitorImpl(Class<T> entityClass) {
+        this.builder = new GenericRsqlSpecBuilder<>(entityClass);
+    }
 
     @Override
     public Specification<T> visit(AndNode node, Void param) {

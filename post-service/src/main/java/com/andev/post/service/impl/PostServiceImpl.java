@@ -168,7 +168,7 @@ public class PostServiceImpl implements PostService {
         log.debug("Searching posts with RSQL query: {}", rsqlQuery);
 
         try {
-            Specification<Post> specification = rsqlParserService.parse(rsqlQuery);
+            Specification<Post> specification = rsqlParserService.parse(rsqlQuery, Post.class);
             Page<Post> page = postRepository.findAll(specification, pageable);
 
             log.info("Found {} posts matching RSQL query: {}", page.getTotalElements(), rsqlQuery);
