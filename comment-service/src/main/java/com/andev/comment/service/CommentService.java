@@ -33,4 +33,53 @@ public interface CommentService {
      * @return list of comments with nested sub-comments
      */
     CommentsResponse<PaginationResponse<CommentDTO>> getCommentsHierarchy(String postId);
+
+    /**
+     * Permanently deletes a comment by its ID.
+     *
+     * @param id the comment ID to delete
+     * @return the deleted comment DTO
+     */
+    CommentsResponse<CommentDTO> deleteComment(String id);
+
+    /**
+     * Soft deletes a comment by marking it as deleted.
+     *
+     * @param id the comment ID to soft delete
+     * @return the soft-deleted comment DTO
+     */
+    CommentsResponse<CommentDTO> softDeleteComment(String id);
+
+    /**
+     * Retrieves all comments with pagination and sorting support.
+     *
+     * @param page the page number (0-based)
+     * @param size the number of comments per page
+     * @param sort the sorting specification (field,direction)
+     * @return paginated list of comments
+     */
+    CommentsResponse<PaginationResponse<CommentDTO>> getAllComments(int page, int size, String sort);
+
+    /**
+     * Retrieves comments by user ID with pagination and sorting.
+     *
+     * @param userId the user ID
+     * @param page the page number (0-based)
+     * @param size the number of comments per page
+     * @param sort the sorting specification (field,direction)
+     * @return paginated list of comments for the user
+     */
+    CommentsResponse<PaginationResponse<CommentDTO>> getCommentsByUserId(
+            String userId, int page, int size, String sort);
+
+    /**
+     * Performs advanced search using RSQL (RESTful Service Query Language).
+     *
+     * @param query the RSQL query string for filtering comments
+     * @param page the page number (0-based)
+     * @param size the number of comments per page
+     * @param sort the sorting specification (field,direction)
+     * @return paginated search results
+     */
+    CommentsResponse<PaginationResponse<CommentDTO>> searchComments(String query, int page, int size, String sort);
 }

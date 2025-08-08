@@ -59,6 +59,11 @@
 			<artifactId>liquibase-core</artifactId>
 		</dependency>
 
+		<dependency>
+			<groupId>cz.jirutka.rsql</groupId>
+			<artifactId>rsql-parser</artifactId>
+			<version>${cz.jirutka.rsql}</version>
+		</dependency>
 		<!-- Lombok -->
 		<dependency>
 			<groupId>org.projectlombok</groupId>
@@ -120,12 +125,6 @@
 			<artifactId>jackson-datatype-jsr310</artifactId>
 		</dependency>
 
-		<!-- RSQL Parser for dynamic querying -->
-		<dependency>
-			<groupId>cz.jirutka.rsql</groupId>
-			<artifactId>rsql-parser</artifactId>
-			<version>${cz.jirutka.rsql}</version>
-		</dependency>
 
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
