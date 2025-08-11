@@ -121,7 +121,6 @@ public class CommentController implements CommentEndpoints {
     @Override
     public ResponseEntity<CommentsResponse<PaginationResponse<CommentDTO>>> getAllComments(
             int page, int size, String sort) {
-        Pageable pageable = createPageable(page, size, sort);
         CommentsResponse<PaginationResponse<CommentDTO>> response = commentService.getAllComments(page, size, sort);
         return ResponseEntity.ok(response);
     }
@@ -154,73 +153,5 @@ public class CommentController implements CommentEndpoints {
         CommentsResponse<PaginationResponse<CommentDTO>> response =
                 commentService.searchComments(query, page, size, sort);
         return ResponseEntity.ok(response);
-    }
-
-    /**
-     * Creates a Pageable object with proper sorting handling using dynamic field mapping.
-     *
-     * This method creates a Spring Data Pageable object with sorting support.
-     * It uses the SortingHelper to dynamically map entity field names to
-     * database column names, eliminating the need for hardcoded field mappings.
-     *
-     * <h3>Sorting Format:</h3>
-     * <ul>
-     *   <li><strong>field,direction</strong> - e.g., "content,asc", "createdAt,desc"</li>
-     *   <li><strong>direction values:</strong> "asc" (ascending), "desc" (descending)</li>
-     *   <li><strong>default:</strong> If no sort specified, defaults to "id,asc"</li>
-     * </ul>
-     *
-     * <h3>Dynamic Field Mapping:</h3>
-     * <ul>
-     *   <li><strong>userId</strong> → "userId" (no conversion needed)</li>
-     *   <li><strong>postId</strong> → "postId" (no conversion needed)</li>
-     *   <li><strong>likesCount</strong> → "likesCount" (no conversion needed)</li>
-     *   <li><strong>createdAt</strong> → "createdAt" (no conversion needed)</li>
-     * </ul>
-     *
-     * @param page The page number (0-based)
-     * @param size The number of items per page
-     * @param sort The sorting specification (field,direction)
-     * @return A Pageable object with proper sorting configuration
-     *
-     * <h3>Examples:</h3>
-     * <pre>{@code
-     * // Sort by content ascending
-     * createPageable(0, 10, "content,asc")
-     * // Results in: PageRequest.of(0, 10, Sort.by("content"))
-     *
-     * // Sort by creation date descending
-     * createPageable(0, 10, "createdAt,desc")
-     * // Results in: PageRequest.of(0, 10, Sort.by("createdAt", Sort.Direction.DESC))
-     *
-     * // No sorting specified
-     * createPageable(0, 10, null)
-     * // Results in: PageRequest.of(0, 10, Sort.by("id", Sort.Direction.ASC))
-     * }</pre>
-     *
-     * <h3>Benefits:</h3>
-     * <ul>
-     *   <li><strong>No hardcoded mappings:</strong> Automatically adapts to entity changes</li>
-     *   <li><strong>Annotation-aware:</strong> Uses @Field annotations for field mapping</li>
-     *   <li><strong>Fallback support:</strong> Converts camelCase to snake_case when needed</li>
-     *   <li><strong>Error handling:</strong> Graceful fallback to original field name</li>
-     * </ul>
-     */
-    private Pageable createPageable(int page, int size, String sort) {
-        if (sort != null && !sort.trim().isEmpty()) {
-            String[] sortParts = sort.split(",");
-            if (sortParts.length == 2) {
-                String field = sortParts[0].trim();
-                String direction = sortParts[1].trim().toUpperCase();
-
-                // Use dynamic field mapping instead of hardcoded values
-                String sortField = SortingHelper.getColumnName(Comments.class, field);
-
-                Sort.Direction sortDirection = "DESC".equals(direction) ? Sort.Direction.DESC : Sort.Direction.ASC;
-
-                return PageRequest.of(page, size, Sort.by(sortDirection, sortField));
-            }
-        }
-        return PageRequest.of(page, size, Sort.by(Sort.Direction.ASC, "id"));
     }
 }
