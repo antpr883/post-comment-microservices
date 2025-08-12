@@ -12,7 +12,7 @@ import com.andev.user.config.interceptor.RequestResponseLoggingInterceptor;
  *
  * Configures request/response logging and other web-related settings.
  */
-@Configuration
+@Configuration("userWebConfig")
 public class WebConfig implements WebMvcConfigurer {
 
     @Autowired

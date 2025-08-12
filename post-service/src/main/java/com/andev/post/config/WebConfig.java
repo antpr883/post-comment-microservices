@@ -12,7 +12,7 @@ import com.andev.post.config.interceptor.RequestResponseLoggingInterceptor;
  * 
  * Configures request/response logging and other web-related settings.
  */
-@Configuration
+@Configuration("postWebConfig")
 public class WebConfig implements WebMvcConfigurer {
 
     @Autowired
