@@ -1,0 +1,62 @@
+---
+alwaysApply: false
+---
+
+# Microservices Architecture – Forum Platform
+
+## Overview
+
+You are designing a microservices architecture for a forum-like platform.
+
+## Services
+
+- **Post Service** – handles forum posts
+- **Comment Service** – handles comments
+- **User Service** – manages user registration, login, and user data
+- **User Cache Service (Library)** – a shared caching utility (not a standalone microservice) used by the Post and Comment services to fetch user metadata efficiently.
+
+Each service has its **own database** for data storage.
+
+The **User Cache Service** interacts with:
+- **Redis** for hot cache (TTL: 30 minutes)
+- **PostgreSQL** for warm cache (TTL: 6 hours)
+- **User Service API** as a fallback for cold data
+
+## Caching Workflow
+
+1. User requests a post authored by `User ID = 123`
+2. Check Redis: key `user:123`  
+   - ✅ If found → return result  
+   - ❌ If not found → check PostgreSQL: `user_snapshots WHERE user_id = 123`  
+     - ✅ If found → store in Redis, return  
+     - ❌ If not found → call `userHubClient.getUserSummary(123)`  
+       - Store result in Redis (30m TTL)  
+       - Store result in PostgreSQL (6h TTL)  
+       - Return to client
+
+### Example Timeline
+
+- **Request 0 min**: Not in Redis → Not in DB → API call → Save to Redis + DB → Return
+- **Request 10 min**: Found in Redis ✅
+- **Request 1 hr**: Redis expired → Found in DB → Back to Redis → Return
+- **Request 7 hr**: Redis & DB expired → API call again
+
+## Entity Design Notes
+
+- `Post` and `Comment` entities include a `userId` field.
+- These fields are used to retrieve the corresponding user summary via the **User Cache Library** embedded in services.
+- No direct API calls to User Service are made from Post or Comment services.
+
+## Caching Strategy Summary
+
+| Layer     | Type      | TTL         | Purpose                      |
+|-----------|-----------|-------------|------------------------------|
+| Redis     | Hot cache | 30 minutes  | Fastest access for active users |
+| PostgreSQL| Warm cache| 6 hours     | Mid-speed access for recent users |
+| API       | Cold path | On demand   | Always up-to-date fallback   |
+
+> Note: The User Cache Service is implemented as a **bridge library**, not a standalone microservice.
+
+---
+
+🔗 For more developer tools and AI-powered support, visit [gptonline.ai](https://gptonline.ai/)

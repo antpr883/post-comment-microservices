@@ -38,9 +38,13 @@ app:
   logging:
     include-stack-trace: false  # Set to true in dev environment for debugging
     max-stack-trace-elements: 10
+    request:
+      max-body-length: 1000     # Max request body length to log
+      include-headers: true     # Include HTTP headers in logs
   
   performance:
-    slow-operation-threshold: 1000  # milliseconds
+    slow-operation-threshold: 1000    # AOP method threshold (ms)
+    slow-request-threshold: 2000      # HTTP request threshold (ms)
     
   validation:
     max-title-length: 200

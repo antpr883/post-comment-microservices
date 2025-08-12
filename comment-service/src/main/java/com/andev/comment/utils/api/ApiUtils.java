@@ -1,6 +1,6 @@
 package com.andev.comment.utils.api;
 
-import com.andev.comment.model.constants.api.ApiConstants;
+import com.andev.comment.model.constants.ApiConstants;
 
 public class ApiUtils {
 

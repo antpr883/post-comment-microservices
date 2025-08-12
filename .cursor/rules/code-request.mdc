@@ -1,0 +1,50 @@
+---
+alwaysApply: true
+---
+
+!!!
+language: Java
+framework: Spring Boot
+!!!
+
+## How to interpret prompt and commands
+
+1. Prompt what to do.
+
+2. After prompt there is can be commands, each starting with `-` on a new line, to control processing.
+
+### Example:
+
+# create example of pattern proxy in folder example
+-code
+-sequential
+-doc
+
+---
+
+## Behavior:
+
+- `-code` — generate the code.
+- `-sequential` — split the task into sequential steps and explain step by step.
+- `-doc` — add or update Google-style JavaDoc comments for new or updated code.
+
+---
+    
+## Processing steps:
+
+1. Always read and apply rules from:
+   1 role.mdc 
+   2 technical.mdc.
+
+2. If `-code` is present , use MCP server `context7`.
+    Usage format: > use context7
+
+3. If `-sequential` is present, switch to MCP server `sequential-thinking`.
+
+4. If `-search` command is present, optionally perform a Brave web search.
+
+5. When `-doc` or `doc` commands are present, generate JavaDoc comments.
+
+---
+
+!!!Always write the steps you are doing and when you call MCP servers.

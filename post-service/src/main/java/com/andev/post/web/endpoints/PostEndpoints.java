@@ -224,11 +224,14 @@ public interface PostEndpoints {
             description =
                     "Search posts using RSQL (RESTful Service Query Language) with support for complex filtering, "
                             + "including JSON field search in description. Examples: "
-                            + "'title==*test*' (title contains 'test'), "
+                            + "'title==*Spring*' (title contains 'Spring'), "
                             + "'authorId==123' (exact author ID), "
-                            + "'description.author==John' (JSON field search), "
-                            + "'postStatus==ACTIVE;likes>10' (multiple conditions), "
-                            + "'title==*test*;authorId==123;description.author==John' (complex query)")
+                            + "'status==ACTIVE' (post status), "
+                            + "'likes>10' (posts with more than 10 likes), "
+                            + "'description.summary==*tutorial*' (JSON field search), "
+                            + "'status==ACTIVE;likes>5' (active posts with >5 likes), "
+                            + "'title==*Java*,title==*Spring*' (OR condition - title contains Java OR Spring), "
+                            + "'authorId==123;status==ACTIVE;likes>=10' (complex AND query)")
     @ApiResponses(
             value = {
                 @ApiResponse(
