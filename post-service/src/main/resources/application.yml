@@ -1,10 +1,10 @@
 spring:
   application:
     name: post-service
-  
+
   profiles:
     active: dev
-  
+
   main:
     allow-bean-definition-overriding: true
     allow-circular-references: true
@@ -12,6 +12,26 @@ spring:
   config:
     import:
       - classpath:api.properties
+
+  # Optimized database connection pooling  
+  datasource:
+    hikari:
+      # Connection pool sizing (posts service may have higher load)
+      maximum-pool-size: 25           # Max connections in pool
+      minimum-idle: 8                 # Min idle connections 
+      
+      # Connection timeouts
+      connection-timeout: 20000       # 20 seconds to get connection
+      idle-timeout: 300000           # 5 minutes idle timeout
+      max-lifetime: 1200000          # 20 minutes max connection lifetime
+      
+      # Performance optimizations
+      leak-detection-threshold: 60000 # 60 seconds leak detection
+      pool-name: "PostServiceHikariCP"
+      
+      # Connection validation
+      connection-test-query: "SELECT 1"
+      validation-timeout: 3000        # 3 seconds validation timeout
 
 # Application specific configuration
 app:

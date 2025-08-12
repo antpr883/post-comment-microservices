@@ -6,5 +6,6 @@
         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
 
     <include file="changes/004-new-user-roles-structure.sql" relativeToChangelogFile="true"/>
+    <include file="changes/005-add-performance-indexes.sql" relativeToChangelogFile="true"/>
 
 </databaseChangeLog>

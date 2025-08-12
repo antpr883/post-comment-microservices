@@ -15,7 +15,10 @@ import lombok.*;
 @Document(collection = "comments")
 @CompoundIndexes({
     @CompoundIndex(name = "post_created_idx", def = "{'postId': 1, 'createdAt': -1}"),
-    @CompoundIndex(name = "parent_created_idx", def = "{'parentCommentId': 1, 'createdAt': 1}")
+    @CompoundIndex(name = "parent_created_idx", def = "{'parentCommentId': 1, 'createdAt': 1}"),
+    @CompoundIndex(name = "author_post_idx", def = "{'authorId': 1, 'postId': 1, 'createdAt': -1}"),
+    @CompoundIndex(name = "post_status_idx", def = "{'postId': 1, 'status': 1, 'createdAt': -1}"),
+    @CompoundIndex(name = "text_search_idx", def = "{'content': 'text', 'postId': 1}")
 })
 @Data
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)

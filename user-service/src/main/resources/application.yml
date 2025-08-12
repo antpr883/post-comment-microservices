@@ -1,10 +1,10 @@
 spring:
   application:
     name: user-service
-  
+
   profiles:
     active: dev
-  
+
   main:
     allow-bean-definition-overriding: true
     allow-circular-references: true
@@ -13,14 +13,38 @@ spring:
     import:
       - classpath:api.properties
 
+  # Optimized database connection pooling
+  datasource:
+    hikari:
+      # Connection pool sizing
+      maximum-pool-size: 20           # Max connections in pool
+      minimum-idle: 5                 # Min idle connections 
+      
+      # Connection timeouts
+      connection-timeout: 20000       # 20 seconds to get connection
+      idle-timeout: 300000           # 5 minutes idle timeout
+      max-lifetime: 1200000          # 20 minutes max connection lifetime
+      
+      # Performance optimizations
+      leak-detection-threshold: 60000 # 60 seconds leak detection
+      pool-name: "UserServiceHikariCP"
+      
+      # Connection validation
+      connection-test-query: "SELECT 1"
+      validation-timeout: 3000        # 3 seconds validation timeout
+
 # Application specific configuration
 app:
   logging:
     include-stack-trace: false  # Set to true in dev environment for debugging
     max-stack-trace-elements: 10
+    request:
+      max-body-length: 1000     # Max request body length to log
+      include-headers: true     # Include HTTP headers in logs
   
   performance:
-    slow-operation-threshold: 1000  # milliseconds
+    slow-operation-threshold: 1000    # AOP method threshold (ms)
+    slow-request-threshold: 2000      # HTTP request threshold (ms)
     
   validation:
     max-username-length: 50

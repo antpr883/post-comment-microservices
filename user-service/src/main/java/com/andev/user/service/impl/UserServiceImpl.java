@@ -34,10 +34,17 @@ import lombok.extern.slf4j.Slf4j;
 /**
  * Implementation of UserService
  */
+/**
+ * Implementation of UserService with optimized transaction boundaries.
+ *
+ * Transaction strategy:
+ * - Read operations: @Transactional(readOnly = true) for better performance
+ * - Write operations: @Transactional with proper isolation
+ * - No class-level @Transactional to avoid unnecessary transaction overhead
+ */
 @Slf4j
 @Service
 @RequiredArgsConstructor
-@Transactional
 @AuditLog
 public class UserServiceImpl implements UserService {
 
@@ -131,6 +138,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
     @CacheEvict(value = "users", allEntries = true)
     public AppResponse<UserDto> createUser(UserRequestDto requestDto) {
         log.info("Creating new user: {}", requestDto.getEmail());
@@ -162,6 +170,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
     @CacheEvict(value = "users", allEntries = true)
     public AppResponse<UserDto> updateUser(Long id, UserUpdateRequestDto updateDto) {
         log.info("Updating user with id: {}", id);
