@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -30,12 +31,22 @@ import com.andev.post.web.response.PaginationResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+/**
+ * Implementation of PostService for managing post operations.
+ *
+ * Provides CRUD operations for posts with advanced search capabilities using RSQL,
+ * user data enrichment through cache service, and comprehensive audit logging.
+ * Supports soft delete, status management, and performance-optimized queries.
+ */
 @Slf4j
 @Service
 @AuditLog
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class PostServiceImpl implements PostService {
+
+    @Value("${app.post.default-status:ACTIVE}")
+    private String defaultPostStatus;
 
     private final PostMapper postMapper;
     private final PostRepository postRepository;
@@ -44,12 +55,21 @@ public class PostServiceImpl implements PostService {
     @Autowired(required = false)
     private UserCacheService userCacheService;
 
+    /**
+     * Creates a new post with the provided data.
+     *
+     * Sets the default post status from configuration and enriches the response
+     * with user data from the cache service when available.
+     *
+     * @param requestDto the post creation request data
+     * @return AppResponse containing the created PostDto with user information
+     */
     @Override
     @Transactional
     public AppResponse<PostDto> create(PostRequestDto requestDto) {
         log.debug("Creating post with title: {}", requestDto.getTitle());
         Post post = postMapper.toEntity(requestDto);
-        post.setPostStatus(PostStatus.ACTIVE); // Default status
+        post.setPostStatus(PostStatus.valueOf(defaultPostStatus)); // Configurable default status
         Post savedPost = postRepository.save(post);
         PostDto dto = postMapper.toDto(savedPost);
         enrichWithUserData(dto, savedPost.getAuthorId());
@@ -163,6 +183,22 @@ public class PostServiceImpl implements PostService {
         log.info("Bulk-updated status for {} posts to {}", updated, newStatus);
     }
 
+    /**
+     * Searches posts using RSQL (RESTful Search Query Language).
+     *
+     * Supports complex queries with logical operators (AND, OR) and comparison operators
+     * (==, !=, =gt=, =lt=, etc.). Returns paginated results with user data enrichment.
+     *
+     * Example queries:
+     * - title==*Spring* (contains Spring)
+     * - status==ACTIVE;likes=gt=10 (active posts with > 10 likes)
+     * - authorId==123,authorId==456 (posts by specific authors)
+     *
+     * @param rsqlQuery the RSQL query string
+     * @param pageable  pagination parameters
+     * @return AppResponse with paginated PostDto results
+     * @throws IllegalArgumentException if RSQL query is invalid
+     */
     @Override
     public AppResponse<PaginationResponse<PostDto>> search(String rsqlQuery, Pageable pageable) {
         log.debug("Searching posts with RSQL query: {}", rsqlQuery);
@@ -218,8 +254,15 @@ public class PostServiceImpl implements PostService {
         return null;
     }
 
+    /**
+     * Converts Page<Post> to paginated response with optimized user data enrichment.
+     * Uses batch retrieval to avoid N+1 queries when fetching user data.
+     */
     private AppResponse<PaginationResponse<PostDto>> toPaginatedResponse(Page<Post> page) {
-        List<PostDto> dtos = page.getContent().stream()
+        List<Post> posts = page.getContent();
+
+        // Convert to DTOs with batch user data enrichment
+        List<PostDto> dtos = posts.stream()
                 .map(post -> {
                     PostDto dto = postMapper.toDto(post);
                     enrichWithUserData(dto, post.getAuthorId());

@@ -3,7 +3,6 @@ package com.andev.user.service;
 import java.util.List;
 import java.util.Optional;
 
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 import com.andev.user.model.domain.dto.UserDto;
@@ -11,6 +10,8 @@ import com.andev.user.model.domain.dto.request.UserRequestDto;
 import com.andev.user.model.domain.dto.request.UserUpdateRequestDto;
 import com.andev.user.model.entities.User;
 import com.andev.user.model.enums.UserStatus;
+import com.andev.user.web.response.AppResponse;
+import com.andev.user.web.response.PaginationResponse;
 
 /**
  * Service interface for User operations
@@ -20,12 +21,12 @@ public interface UserService extends BaseService<User, UserDto, Long> {
     /**
      * Create new user
      */
-    UserDto createUser(UserRequestDto requestDto);
+    AppResponse<UserDto> createUser(UserRequestDto requestDto);
 
     /**
      * Update user
      */
-    UserDto updateUser(Long id, UserUpdateRequestDto updateDto);
+    AppResponse<UserDto> updateUser(Long id, UserUpdateRequestDto updateDto);
 
     /**
      * Find user by email
@@ -45,7 +46,7 @@ public interface UserService extends BaseService<User, UserDto, Long> {
     /**
      * Find users by status with pagination
      */
-    Page<UserDto> findByStatus(UserStatus status, Pageable pageable);
+    AppResponse<PaginationResponse<UserDto>> findByStatus(UserStatus status, Pageable pageable);
 
     /**
      * Search users by email pattern
@@ -91,6 +92,16 @@ public interface UserService extends BaseService<User, UserDto, Long> {
      * Check if user exists by nickname
      */
     boolean existsByNickname(String nickname);
+
+    /**
+     * Find all users with pagination
+     */
+    AppResponse<PaginationResponse<UserDto>> findAllUsers(Pageable pageable);
+
+    /**
+     * Search users with RSQL query
+     */
+    AppResponse<PaginationResponse<UserDto>> searchUsers(String rsqlQuery, Pageable pageable);
 
     /**
      * Search users with RSQL query

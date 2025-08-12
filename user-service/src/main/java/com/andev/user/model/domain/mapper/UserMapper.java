@@ -26,6 +26,8 @@ public interface UserMapper {
      * Convert entity to DTO
      */
     @Mapping(target = "roles", ignore = true)
+    @Mapping(target = "createdAt", source = "created")
+    @Mapping(target = "updatedAt", source = "updated")
     UserDto toDto(User entity);
 
     /**
@@ -33,6 +35,8 @@ public interface UserMapper {
      */
     @Mapping(target = "role", ignore = true)
     @Mapping(target = "password", ignore = true)
+    @Mapping(target = "created", source = "createdAt")
+    @Mapping(target = "updated", source = "updatedAt")
     User toEntity(UserDto dto);
 
     /**
@@ -45,6 +49,8 @@ public interface UserMapper {
      */
     @Mapping(target = "role", ignore = true)
     @Mapping(target = "password", ignore = true)
+    @Mapping(target = "created", source = "createdAt")
+    @Mapping(target = "updated", source = "updatedAt")
     List<User> toEntityList(List<UserDto> dtos);
 
     /**

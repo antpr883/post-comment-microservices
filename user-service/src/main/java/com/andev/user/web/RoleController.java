@@ -8,7 +8,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import com.andev.user.model.constants.api.ApiConstants;
+import com.andev.user.model.constants.ApiConstants;
 import com.andev.user.model.domain.dto.RoleDto;
 import com.andev.user.model.domain.dto.request.RoleRequestDto;
 import com.andev.user.service.RoleService;

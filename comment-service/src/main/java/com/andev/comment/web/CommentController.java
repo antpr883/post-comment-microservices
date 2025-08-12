@@ -1,17 +1,12 @@
 package com.andev.comment.web;
 
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.andev.comment.model.domain.CommentDTO;
-import com.andev.comment.model.entitie.Comments;
 import com.andev.comment.service.CommentService;
-import com.andev.comment.service.rsql.SortingHelper;
-import com.andev.comment.web.response.CommentsResponse;
+import com.andev.comment.web.response.AppResponse;
 import com.andev.comment.web.response.PaginationResponse;
 
 import lombok.RequiredArgsConstructor;
@@ -101,57 +96,55 @@ public class CommentController implements CommentEndpoints {
     private final CommentService commentService;
 
     @Override
-    public ResponseEntity<CommentsResponse<CommentDTO>> findById(String id) {
-        CommentsResponse<CommentDTO> response = commentService.findById(id);
+    public ResponseEntity<AppResponse<CommentDTO>> findById(String id) {
+        AppResponse<CommentDTO> response = commentService.findById(id);
         return ResponseEntity.ok(response);
     }
 
     @Override
-    public ResponseEntity<CommentsResponse<CommentDTO>> deleteComment(String id) {
-        CommentsResponse<CommentDTO> response = commentService.deleteComment(id);
+    public ResponseEntity<AppResponse<CommentDTO>> deleteComment(String id) {
+        AppResponse<CommentDTO> response = commentService.deleteComment(id);
         return ResponseEntity.ok(response);
     }
 
     @Override
-    public ResponseEntity<CommentsResponse<CommentDTO>> softDeleteComment(String id) {
-        CommentsResponse<CommentDTO> response = commentService.softDeleteComment(id);
+    public ResponseEntity<AppResponse<CommentDTO>> softDeleteComment(String id) {
+        AppResponse<CommentDTO> response = commentService.softDeleteComment(id);
         return ResponseEntity.ok(response);
     }
 
     @Override
-    public ResponseEntity<CommentsResponse<PaginationResponse<CommentDTO>>> getAllComments(
-            int page, int size, String sort) {
-        CommentsResponse<PaginationResponse<CommentDTO>> response = commentService.getAllComments(page, size, sort);
+    public ResponseEntity<AppResponse<PaginationResponse<CommentDTO>>> getAllComments(int page, int size, String sort) {
+        AppResponse<PaginationResponse<CommentDTO>> response = commentService.getAllComments(page, size, sort);
         return ResponseEntity.ok(response);
     }
 
     @Override
-    public ResponseEntity<CommentsResponse<PaginationResponse<CommentDTO>>> getCommentsByUserId(
+    public ResponseEntity<AppResponse<PaginationResponse<CommentDTO>>> getCommentsByUserId(
             String userId, int page, int size, String sort) {
-        CommentsResponse<PaginationResponse<CommentDTO>> response =
+        AppResponse<PaginationResponse<CommentDTO>> response =
                 commentService.getCommentsByUserId(userId, page, size, sort);
         return ResponseEntity.ok(response);
     }
 
     @Override
-    public ResponseEntity<CommentsResponse<PaginationResponse<CommentDTO>>> getCommentsByPostId(
+    public ResponseEntity<AppResponse<PaginationResponse<CommentDTO>>> getCommentsByPostId(
             String postId, int page, int size, String sort) {
-        CommentsResponse<PaginationResponse<CommentDTO>> response = commentService.getCommentsByPostId(postId);
+        AppResponse<PaginationResponse<CommentDTO>> response = commentService.getCommentsByPostId(postId);
         return ResponseEntity.ok(response);
     }
 
     @Override
-    public ResponseEntity<CommentsResponse<PaginationResponse<CommentDTO>>> getCommentsHierarchy(
+    public ResponseEntity<AppResponse<PaginationResponse<CommentDTO>>> getCommentsHierarchy(
             String postId, int page, int size, String sort) {
-        CommentsResponse<PaginationResponse<CommentDTO>> response = commentService.getCommentsHierarchy(postId);
+        AppResponse<PaginationResponse<CommentDTO>> response = commentService.getCommentsHierarchy(postId);
         return ResponseEntity.ok(response);
     }
 
     @Override
-    public ResponseEntity<CommentsResponse<PaginationResponse<CommentDTO>>> searchComments(
+    public ResponseEntity<AppResponse<PaginationResponse<CommentDTO>>> searchComments(
             String query, int page, int size, String sort) {
-        CommentsResponse<PaginationResponse<CommentDTO>> response =
-                commentService.searchComments(query, page, size, sort);
+        AppResponse<PaginationResponse<CommentDTO>> response = commentService.searchComments(query, page, size, sort);
         return ResponseEntity.ok(response);
     }
 }

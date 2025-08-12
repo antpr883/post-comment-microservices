@@ -3,43 +3,44 @@ package com.andev.user.web.response;
 import java.io.Serializable;
 import java.util.List;
 
-import org.springframework.data.domain.Page;
-
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.experimental.SuperBuilder;
 
-/**
- * Pagination response wrapper
- */
 @Data
-@SuperBuilder(toBuilder = true)
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class PaginationResponse<T> implements Serializable {
-
     private List<T> content;
-    private int pageNumber;
-    private int pageSize;
-    private long totalElements;
-    private int totalPages;
-    private boolean first;
-    private boolean last;
-    private boolean hasNext;
-    private boolean hasPrevious;
+    private Pagination pagination;
 
-    public static <T> PaginationResponse<T> fromPage(Page<T> page) {
+    @Data
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class Pagination implements Serializable {
+        private long total;
+        private int limit;
+        private int page;
+        private int pages;
+    }
+
+    /**
+     * Helper method to create PaginationResponse from Spring Data Page
+     */
+    public static <T> PaginationResponse<T> fromPage(org.springframework.data.domain.Page<T> page) {
+        Pagination pagination = Pagination.builder()
+                .total(page.getTotalElements())
+                .limit(page.getSize())
+                .page(page.getNumber())
+                .pages(page.getTotalPages())
+                .build();
+
         return PaginationResponse.<T>builder()
                 .content(page.getContent())
-                .pageNumber(page.getNumber())
-                .pageSize(page.getSize())
-                .totalElements(page.getTotalElements())
-                .totalPages(page.getTotalPages())
-                .first(page.isFirst())
-                .last(page.isLast())
-                .hasNext(page.hasNext())
-                .hasPrevious(page.hasPrevious())
+                .pagination(pagination)
                 .build();
     }
 }

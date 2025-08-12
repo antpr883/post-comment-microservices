@@ -1,4 +1,4 @@
-package com.andev.user.config.aop;
+package com.andev.comment.config.aop;
 
 import java.lang.reflect.Method;
 import java.time.Instant;
@@ -23,9 +23,9 @@ import lombok.extern.slf4j.Slf4j;
 
 /**
  * Enhanced AOP Aspect for comprehensive audit and performance logging.
- * Provides detailed tracking of user service operations with contextual information.
+ * Provides detailed tracking of comment service operations with contextual information.
  *
- * @author User Service Team
+ * @author Comment Service Team
  * @since 1.0
  */
 @Slf4j

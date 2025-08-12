@@ -13,6 +13,27 @@ spring:
     import:
       - classpath:api.properties
 
+# Application specific configuration
+app:
+  logging:
+    include-stack-trace: false  # Set to true in dev environment for debugging
+    max-stack-trace-elements: 10
+  
+  performance:
+    slow-operation-threshold: 1000  # milliseconds
+    
+  validation:
+    max-title-length: 200
+    max-content-length: 10000
+    max-batch-size: 100
+    
+  search:
+    default-page-size: 10
+    max-page-size: 100
+    
+  post:
+    default-status: ACTIVE  # Default status for new posts
+
 # SpringDoc OpenAPI Configuration
 springdoc:
   api-docs:

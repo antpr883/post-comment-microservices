@@ -1,7 +1,7 @@
 package com.andev.comment.service;
 
 import com.andev.comment.model.domain.CommentDTO;
-import com.andev.comment.web.response.CommentsResponse;
+import com.andev.comment.web.response.AppResponse;
 import com.andev.comment.web.response.PaginationResponse;
 
 /**
@@ -16,7 +16,7 @@ public interface CommentService {
      * @param id the comment ID
      * @return the comment DTO with user information
      */
-    CommentsResponse<CommentDTO> findById(String id);
+    AppResponse<CommentDTO> findById(String id);
 
     /**
      * Retrieves all comments for a specific post.
@@ -24,7 +24,7 @@ public interface CommentService {
      * @param postId the post ID
      * @return list of comment DTOs with user information
      */
-    CommentsResponse<PaginationResponse<CommentDTO>> getCommentsByPostId(String postId);
+    AppResponse<PaginationResponse<CommentDTO>> getCommentsByPostId(String postId);
 
     /**
      * Retrieves all comments with their sub-comments (hierarchical structure) for a specific post.
@@ -32,7 +32,7 @@ public interface CommentService {
      * @param postId the post ID
      * @return list of comments with nested sub-comments
      */
-    CommentsResponse<PaginationResponse<CommentDTO>> getCommentsHierarchy(String postId);
+    AppResponse<PaginationResponse<CommentDTO>> getCommentsHierarchy(String postId);
 
     /**
      * Permanently deletes a comment by its ID.
@@ -40,7 +40,7 @@ public interface CommentService {
      * @param id the comment ID to delete
      * @return the deleted comment DTO
      */
-    CommentsResponse<CommentDTO> deleteComment(String id);
+    AppResponse<CommentDTO> deleteComment(String id);
 
     /**
      * Soft deletes a comment by marking it as deleted.
@@ -48,7 +48,7 @@ public interface CommentService {
      * @param id the comment ID to soft delete
      * @return the soft-deleted comment DTO
      */
-    CommentsResponse<CommentDTO> softDeleteComment(String id);
+    AppResponse<CommentDTO> softDeleteComment(String id);
 
     /**
      * Retrieves all comments with pagination and sorting support.
@@ -58,7 +58,7 @@ public interface CommentService {
      * @param sort the sorting specification (field,direction)
      * @return paginated list of comments
      */
-    CommentsResponse<PaginationResponse<CommentDTO>> getAllComments(int page, int size, String sort);
+    AppResponse<PaginationResponse<CommentDTO>> getAllComments(int page, int size, String sort);
 
     /**
      * Retrieves comments by user ID with pagination and sorting.
@@ -69,8 +69,7 @@ public interface CommentService {
      * @param sort the sorting specification (field,direction)
      * @return paginated list of comments for the user
      */
-    CommentsResponse<PaginationResponse<CommentDTO>> getCommentsByUserId(
-            String userId, int page, int size, String sort);
+    AppResponse<PaginationResponse<CommentDTO>> getCommentsByUserId(String userId, int page, int size, String sort);
 
     /**
      * Performs advanced search using RSQL (RESTful Service Query Language).
@@ -81,5 +80,5 @@ public interface CommentService {
      * @param sort the sorting specification (field,direction)
      * @return paginated search results
      */
-    CommentsResponse<PaginationResponse<CommentDTO>> searchComments(String query, int page, int size, String sort);
+    AppResponse<PaginationResponse<CommentDTO>> searchComments(String query, int page, int size, String sort);
 }

@@ -2,7 +2,6 @@ package com.andev.user.web;
 
 import java.util.List;
 
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -10,7 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import com.andev.user.model.constants.api.ApiConstants;
+import com.andev.user.model.constants.ApiConstants;
 import com.andev.user.model.domain.dto.UserDto;
 import com.andev.user.model.domain.dto.request.UserRequestDto;
 import com.andev.user.model.domain.dto.request.UserUpdateRequestDto;
@@ -57,8 +56,8 @@ public class UserController {
             })
     public ResponseEntity<AppResponse<UserDto>> createUser(@Valid @RequestBody UserRequestDto requestDto) {
         log.info("Creating new user: {}", requestDto.getEmail());
-        UserDto user = userService.createUser(requestDto);
-        return ResponseEntity.status(HttpStatus.CREATED).body(AppResponse.successful(user));
+        AppResponse<UserDto> response = userService.createUser(requestDto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @GetMapping("/{id}")
@@ -107,10 +106,8 @@ public class UserController {
 
         Sort sort = Sort.by(Sort.Direction.fromString(sortDir), sortBy);
         Pageable pageable = PageRequest.of(page, size, sort);
-        Page<UserDto> usersPage = userService.findAll(pageable);
-
-        PaginationResponse<UserDto> response = PaginationResponse.fromPage(usersPage);
-        return ResponseEntity.ok(AppResponse.successful(response));
+        AppResponse<PaginationResponse<UserDto>> response = userService.findAllUsers(pageable);
+        return ResponseEntity.ok(response);
     }
 
     @PutMapping("/{id}")
@@ -128,8 +125,8 @@ public class UserController {
             @Parameter(description = "User ID", example = "1") @PathVariable Long id,
             @Valid @RequestBody UserUpdateRequestDto updateDto) {
         log.info("Updating user with id: {}", id);
-        UserDto user = userService.updateUser(id, updateDto);
-        return ResponseEntity.ok(AppResponse.successful(user));
+        AppResponse<UserDto> response = userService.updateUser(id, updateDto);
+        return ResponseEntity.ok(response);
     }
 
     @DeleteMapping("/{id}")
@@ -196,13 +193,20 @@ public class UserController {
             @Parameter(description = "User status", example = "ACTIVE") @PathVariable UserStatus status) {
         log.info("Getting users by status: {}", status);
         List<UserDto> users = userService.findByStatus(status);
-        PaginationResponse<UserDto> response = new PaginationResponse<>();
-        response.setContent(users);
-        response.setTotalElements((long) users.size());
-        response.setTotalPages(1);
-        response.setPageSize(users.size());
-        response.setPageNumber(0);
-        return ResponseEntity.ok(AppResponse.successful(response));
+
+        PaginationResponse.Pagination pagination = PaginationResponse.Pagination.builder()
+                .total(users.size())
+                .limit(users.size())
+                .page(0)
+                .pages(1)
+                .build();
+
+        PaginationResponse<UserDto> paginationResponse = PaginationResponse.<UserDto>builder()
+                .content(users)
+                .pagination(pagination)
+                .build();
+
+        return ResponseEntity.ok(AppResponse.successful(paginationResponse));
     }
 
     @GetMapping("/search/email")
@@ -220,13 +224,20 @@ public class UserController {
             @Parameter(description = "Email pattern", example = "john") @RequestParam String pattern) {
         log.info("Searching users by email pattern: {}", pattern);
         List<UserDto> users = userService.searchByEmail(pattern);
-        PaginationResponse<UserDto> response = new PaginationResponse<>();
-        response.setContent(users);
-        response.setTotalElements((long) users.size());
-        response.setTotalPages(1);
-        response.setPageSize(users.size());
-        response.setPageNumber(0);
-        return ResponseEntity.ok(AppResponse.successful(response));
+
+        PaginationResponse.Pagination pagination = PaginationResponse.Pagination.builder()
+                .total(users.size())
+                .limit(users.size())
+                .page(0)
+                .pages(1)
+                .build();
+
+        PaginationResponse<UserDto> paginationResponse = PaginationResponse.<UserDto>builder()
+                .content(users)
+                .pagination(pagination)
+                .build();
+
+        return ResponseEntity.ok(AppResponse.successful(paginationResponse));
     }
 
     @GetMapping("/search/nickname")
@@ -244,13 +255,20 @@ public class UserController {
             @Parameter(description = "Nickname pattern", example = "john") @RequestParam String pattern) {
         log.info("Searching users by nickname pattern: {}", pattern);
         List<UserDto> users = userService.searchByNickname(pattern);
-        PaginationResponse<UserDto> response = new PaginationResponse<>();
-        response.setContent(users);
-        response.setTotalElements((long) users.size());
-        response.setTotalPages(1);
-        response.setPageSize(users.size());
-        response.setPageNumber(0);
-        return ResponseEntity.ok(AppResponse.successful(response));
+
+        PaginationResponse.Pagination pagination = PaginationResponse.Pagination.builder()
+                .total(users.size())
+                .limit(users.size())
+                .page(0)
+                .pages(1)
+                .build();
+
+        PaginationResponse<UserDto> paginationResponse = PaginationResponse.<UserDto>builder()
+                .content(users)
+                .pagination(pagination)
+                .build();
+
+        return ResponseEntity.ok(AppResponse.successful(paginationResponse));
     }
 
     @PatchMapping("/{id}/activate")
@@ -335,12 +353,19 @@ public class UserController {
                     String query) {
         log.info("Searching users with RSQL query: {}", query);
         List<UserDto> users = userService.searchWithRsql(query);
-        PaginationResponse<UserDto> response = new PaginationResponse<>();
-        response.setContent(users);
-        response.setTotalElements((long) users.size());
-        response.setTotalPages(1);
-        response.setPageSize(users.size());
-        response.setPageNumber(0);
-        return ResponseEntity.ok(AppResponse.successful(response));
+
+        PaginationResponse.Pagination pagination = PaginationResponse.Pagination.builder()
+                .total(users.size())
+                .limit(users.size())
+                .page(0)
+                .pages(1)
+                .build();
+
+        PaginationResponse<UserDto> paginationResponse = PaginationResponse.<UserDto>builder()
+                .content(users)
+                .pagination(pagination)
+                .build();
+
+        return ResponseEntity.ok(AppResponse.successful(paginationResponse));
     }
 }

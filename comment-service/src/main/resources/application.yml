@@ -12,3 +12,16 @@ spring:
   config:
     import:
       - classpath:api.properties
+
+# Application specific configuration
+app:
+  logging:
+    include-stack-trace: false  # Set to true in dev environment for debugging
+    max-stack-trace-elements: 10
+  
+  performance:
+    slow-operation-threshold: 1000  # milliseconds
+    
+  validation:
+    max-comment-length: 5000
+    max-batch-size: 100

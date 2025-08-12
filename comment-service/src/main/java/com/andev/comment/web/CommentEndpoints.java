@@ -4,7 +4,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import com.andev.comment.model.domain.CommentDTO;
-import com.andev.comment.web.response.CommentsResponse;
+import com.andev.comment.web.response.AppResponse;
 import com.andev.comment.web.response.PaginationResponse;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -59,7 +59,7 @@ public interface CommentEndpoints {
                         content =
                                 @Content(
                                         mediaType = "application/json",
-                                        schema = @Schema(implementation = CommentsResponse.class),
+                                        schema = @Schema(implementation = AppResponse.class),
                                         examples =
                                                 @ExampleObject(
                                                         name = "Success Response",
@@ -92,7 +92,7 @@ public interface CommentEndpoints {
                         content =
                                 @Content(
                                         mediaType = "application/json",
-                                        schema = @Schema(implementation = CommentsResponse.class),
+                                        schema = @Schema(implementation = AppResponse.class),
                                         examples =
                                                 @ExampleObject(
                                                         name = "Not Found Response",
@@ -106,7 +106,7 @@ public interface CommentEndpoints {
                                             """)))
             })
     @GetMapping("/{id}")
-    ResponseEntity<CommentsResponse<CommentDTO>> findById(
+    ResponseEntity<AppResponse<CommentDTO>> findById(
             @Parameter(description = "Unique identifier of the comment", example = "507f1f77bcf86cd799439011")
                     @PathVariable
                     String id);
@@ -118,7 +118,7 @@ public interface CommentEndpoints {
                 @ApiResponse(responseCode = "404", description = "Comment not found")
             })
     @DeleteMapping("/{id}")
-    ResponseEntity<CommentsResponse<CommentDTO>> deleteComment(
+    ResponseEntity<AppResponse<CommentDTO>> deleteComment(
             @Parameter(description = "Unique identifier of the comment to delete", example = "507f1f77bcf86cd799439011")
                     @PathVariable
                     String id);
@@ -132,7 +132,7 @@ public interface CommentEndpoints {
                 @ApiResponse(responseCode = "404", description = "Comment not found")
             })
     @DeleteMapping("/{id}/soft")
-    ResponseEntity<CommentsResponse<CommentDTO>> softDeleteComment(
+    ResponseEntity<AppResponse<CommentDTO>> softDeleteComment(
             @Parameter(
                             description = "Unique identifier of the comment to soft delete",
                             example = "507f1f77bcf86cd799439011")
@@ -145,7 +145,7 @@ public interface CommentEndpoints {
                     "Retrieves all comments with pagination support. Use sort parameter in format: 'field,direction' (e.g., 'id,asc', 'createdAt,desc')")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Comments retrieved successfully")})
     @GetMapping
-    ResponseEntity<CommentsResponse<PaginationResponse<CommentDTO>>> getAllComments(
+    ResponseEntity<AppResponse<PaginationResponse<CommentDTO>>> getAllComments(
             @Parameter(description = "Page number (0-based)", example = "0") @RequestParam(defaultValue = "0") int page,
             @Parameter(description = "Page size", example = "10") @RequestParam(defaultValue = "10") int size,
             @Parameter(
@@ -159,7 +159,7 @@ public interface CommentEndpoints {
             description = "Retrieves all comments by a specific user with pagination")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Comments retrieved successfully")})
     @GetMapping("/user/{userId}")
-    ResponseEntity<CommentsResponse<PaginationResponse<CommentDTO>>> getCommentsByUserId(
+    ResponseEntity<AppResponse<PaginationResponse<CommentDTO>>> getCommentsByUserId(
             @Parameter(description = "User's unique identifier", example = "user456") @PathVariable String userId,
             @Parameter(description = "Page number (0-based)", example = "0") @RequestParam(defaultValue = "0") int page,
             @Parameter(description = "Page size", example = "10") @RequestParam(defaultValue = "10") int size,
@@ -172,7 +172,7 @@ public interface CommentEndpoints {
             description = "Retrieves all comments for a specific post with pagination")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Comments retrieved successfully")})
     @GetMapping("/post/{postId}")
-    ResponseEntity<CommentsResponse<PaginationResponse<CommentDTO>>> getCommentsByPostId(
+    ResponseEntity<AppResponse<PaginationResponse<CommentDTO>>> getCommentsByPostId(
             @Parameter(description = "Post's unique identifier", example = "post123") @PathVariable String postId,
             @Parameter(description = "Page number (0-based)", example = "0") @RequestParam(defaultValue = "0") int page,
             @Parameter(description = "Page size", example = "10") @RequestParam(defaultValue = "10") int size,
@@ -186,7 +186,7 @@ public interface CommentEndpoints {
     @ApiResponses(
             value = {@ApiResponse(responseCode = "200", description = "Comments hierarchy retrieved successfully")})
     @GetMapping("/post/{postId}/hierarchy")
-    ResponseEntity<CommentsResponse<PaginationResponse<CommentDTO>>> getCommentsHierarchy(
+    ResponseEntity<AppResponse<PaginationResponse<CommentDTO>>> getCommentsHierarchy(
             @Parameter(description = "Post's unique identifier", example = "post123") @PathVariable String postId,
             @Parameter(description = "Page number (0-based)", example = "0") @RequestParam(defaultValue = "0") int page,
             @Parameter(description = "Page size", example = "10") @RequestParam(defaultValue = "10") int size,
@@ -212,7 +212,7 @@ public interface CommentEndpoints {
                         content =
                                 @Content(
                                         mediaType = "application/json",
-                                        schema = @Schema(implementation = CommentsResponse.class),
+                                        schema = @Schema(implementation = AppResponse.class),
                                         examples =
                                                 @ExampleObject(
                                                         name = "Success Response",
@@ -255,7 +255,7 @@ public interface CommentEndpoints {
                         content =
                                 @Content(
                                         mediaType = "application/json",
-                                        schema = @Schema(implementation = CommentsResponse.class),
+                                        schema = @Schema(implementation = AppResponse.class),
                                         examples =
                                                 @ExampleObject(
                                                         name = "Invalid Query Response",
@@ -269,7 +269,7 @@ public interface CommentEndpoints {
                                             """)))
             })
     @GetMapping("/search")
-    ResponseEntity<CommentsResponse<PaginationResponse<CommentDTO>>> searchComments(
+    ResponseEntity<AppResponse<PaginationResponse<CommentDTO>>> searchComments(
             @Parameter(
                             description = "RSQL query string for filtering comments. "
                                     + "Supported operators: ==, !=, >, >=, <, <=. "

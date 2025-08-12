@@ -1,8 +1,8 @@
-package com.andev.user.web.response;
+package com.andev.comment.web.response;
 
 import java.io.Serializable;
 
-import com.andev.user.model.constants.ApiConstants;
+import com.andev.comment.model.constants.ApiConstants;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

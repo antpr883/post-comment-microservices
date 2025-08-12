@@ -19,6 +19,8 @@ public interface RoleMapper {
     /**
      * Convert entity to DTO
      */
+    @Mapping(source = "created", target = "createdAt")
+    @Mapping(source = "updated", target = "updatedAt")
     RoleDto toDto(Role entity);
 
     /**
@@ -33,6 +35,8 @@ public interface RoleMapper {
     /**
      * Convert list of entities to list of DTOs
      */
+    @Mapping(source = "created", target = "createdAt")
+    @Mapping(source = "updated", target = "updatedAt")
     List<RoleDto> toDtoList(List<Role> entities);
 
     /**

@@ -15,6 +15,7 @@ import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;
 
 import com.andev.cache.service.UserCacheService;
+import com.andev.comment.config.aop.AuditLog;
 import com.andev.comment.exception.NotFoundException;
 import com.andev.comment.model.domain.CommentDTO;
 import com.andev.comment.model.domain.CommentMapper;
@@ -23,7 +24,7 @@ import com.andev.comment.model.entitie.Comments;
 import com.andev.comment.repository.CommentRepository;
 import com.andev.comment.service.CommentService;
 import com.andev.comment.service.rsql.RsqlParserService;
-import com.andev.comment.web.response.CommentsResponse;
+import com.andev.comment.web.response.AppResponse;
 import com.andev.comment.web.response.PaginationResponse;
 
 import lombok.RequiredArgsConstructor;
@@ -36,6 +37,7 @@ import lombok.extern.slf4j.Slf4j;
 @Service
 @RequiredArgsConstructor
 @Slf4j
+@AuditLog
 public class CommentServiceImpl implements CommentService {
 
     private final CommentRepository commentRepository;
@@ -47,7 +49,7 @@ public class CommentServiceImpl implements CommentService {
     private UserCacheService userCacheService;
 
     @Override
-    public CommentsResponse<CommentDTO> findById(String id) {
+    public AppResponse<CommentDTO> findById(String id) {
         log.info("Searching for comment with id: {}", id);
 
         Comments comment = commentRepository.findByStringId(id).orElseThrow(() -> {
@@ -83,11 +85,11 @@ public class CommentServiceImpl implements CommentService {
             }
         }
 
-        return CommentsResponse.success(dto);
+        return AppResponse.successful(dto);
     }
 
     @Override
-    public CommentsResponse<PaginationResponse<CommentDTO>> getCommentsByPostId(String postId) {
+    public AppResponse<PaginationResponse<CommentDTO>> getCommentsByPostId(String postId) {
         log.info("Searching for comments with postId: {}", postId);
 
         List<Comments> comments = commentRepository.findAllByPostId(postId);
@@ -131,21 +133,23 @@ public class CommentServiceImpl implements CommentService {
                 })
                 .toList();
 
-        PaginationResponse<CommentDTO> paginationResponse = new PaginationResponse<>();
-        paginationResponse.setContent(commentDTOs);
+        PaginationResponse.Pagination pagination = PaginationResponse.Pagination.builder()
+                .total(commentDTOs.size())
+                .limit(commentDTOs.size())
+                .page(0)
+                .pages(1)
+                .build();
 
-        PaginationResponse.Pagination pagination = new PaginationResponse.Pagination();
-        pagination.setTotal(commentDTOs.size());
-        pagination.setLimit(commentDTOs.size());
-        pagination.setCurrentPage(0);
-        pagination.setTotalPages(1);
-        paginationResponse.setPagination(pagination);
+        PaginationResponse<CommentDTO> paginationResponse = PaginationResponse.<CommentDTO>builder()
+                .content(commentDTOs)
+                .pagination(pagination)
+                .build();
 
-        return CommentsResponse.success(paginationResponse);
+        return AppResponse.successful(paginationResponse);
     }
 
     @Override
-    public CommentsResponse<PaginationResponse<CommentDTO>> getCommentsHierarchy(String postId) {
+    public AppResponse<PaginationResponse<CommentDTO>> getCommentsHierarchy(String postId) {
         log.info("Building comments hierarchy for postId: {}", postId);
 
         // Get all comments for the post
@@ -192,21 +196,23 @@ public class CommentServiceImpl implements CommentService {
                 })
                 .toList();
 
-        PaginationResponse<CommentDTO> paginationResponse = new PaginationResponse<>();
-        paginationResponse.setContent(hierarchyComments);
+        PaginationResponse.Pagination pagination = PaginationResponse.Pagination.builder()
+                .total(hierarchyComments.size())
+                .limit(hierarchyComments.size())
+                .page(0)
+                .pages(1)
+                .build();
 
-        PaginationResponse.Pagination pagination = new PaginationResponse.Pagination();
-        pagination.setTotal(hierarchyComments.size());
-        pagination.setLimit(hierarchyComments.size());
-        pagination.setCurrentPage(0);
-        pagination.setTotalPages(1);
-        paginationResponse.setPagination(pagination);
+        PaginationResponse<CommentDTO> paginationResponse = PaginationResponse.<CommentDTO>builder()
+                .content(hierarchyComments)
+                .pagination(pagination)
+                .build();
 
-        return CommentsResponse.success(paginationResponse);
+        return AppResponse.successful(paginationResponse);
     }
 
     @Override
-    public CommentsResponse<CommentDTO> deleteComment(String id) {
+    public AppResponse<CommentDTO> deleteComment(String id) {
         log.info("Deleting comment with id: {}", id);
 
         Comments comment = commentRepository.findByStringId(id).orElseThrow(() -> {
@@ -218,11 +224,11 @@ public class CommentServiceImpl implements CommentService {
         log.info("Comment deleted successfully: {}", id);
 
         CommentDTO dto = commentMapper.toDto(comment);
-        return CommentsResponse.success(dto);
+        return AppResponse.successful(dto);
     }
 
     @Override
-    public CommentsResponse<CommentDTO> softDeleteComment(String id) {
+    public AppResponse<CommentDTO> softDeleteComment(String id) {
         log.info("Soft deleting comment with id: {}", id);
 
         Comments comment = commentRepository.findByStringId(id).orElseThrow(() -> {
@@ -235,11 +241,11 @@ public class CommentServiceImpl implements CommentService {
         log.info("Comment soft deleted successfully: {}", id);
 
         CommentDTO dto = commentMapper.toDto(savedComment);
-        return CommentsResponse.success(dto);
+        return AppResponse.successful(dto);
     }
 
     @Override
-    public CommentsResponse<PaginationResponse<CommentDTO>> getAllComments(int page, int size, String sort) {
+    public AppResponse<PaginationResponse<CommentDTO>> getAllComments(int page, int size, String sort) {
         log.info("Getting all comments with pagination - page: {}, size: {}, sort: {}", page, size, sort);
 
         Pageable pageable = createPageable(page, size, sort);
@@ -249,21 +255,23 @@ public class CommentServiceImpl implements CommentService {
                 .map(this::enrichCommentWithUser)
                 .toList();
 
-        PaginationResponse<CommentDTO> paginationResponse = new PaginationResponse<>();
-        paginationResponse.setContent(commentDTOs);
+        PaginationResponse.Pagination pagination = PaginationResponse.Pagination.builder()
+                .total(commentsPage.getTotalElements())
+                .limit(size)
+                .page(page)
+                .pages(commentsPage.getTotalPages())
+                .build();
 
-        PaginationResponse.Pagination pagination = new PaginationResponse.Pagination();
-        pagination.setTotal(commentsPage.getTotalElements());
-        pagination.setLimit(size);
-        pagination.setCurrentPage(page);
-        pagination.setTotalPages(commentsPage.getTotalPages());
-        paginationResponse.setPagination(pagination);
+        PaginationResponse<CommentDTO> paginationResponse = PaginationResponse.<CommentDTO>builder()
+                .content(commentDTOs)
+                .pagination(pagination)
+                .build();
 
-        return CommentsResponse.success(paginationResponse);
+        return AppResponse.successful(paginationResponse);
     }
 
     @Override
-    public CommentsResponse<PaginationResponse<CommentDTO>> getCommentsByUserId(
+    public AppResponse<PaginationResponse<CommentDTO>> getCommentsByUserId(
             String userId, int page, int size, String sort) {
         log.info(
                 "Getting comments by userId: {} with pagination - page: {}, size: {}, sort: {}",
@@ -283,22 +291,23 @@ public class CommentServiceImpl implements CommentService {
         List<CommentDTO> commentDTOs =
                 comments.stream().map(this::enrichCommentWithUser).toList();
 
-        PaginationResponse<CommentDTO> paginationResponse = new PaginationResponse<>();
-        paginationResponse.setContent(commentDTOs);
+        PaginationResponse.Pagination pagination = PaginationResponse.Pagination.builder()
+                .total(total)
+                .limit(size)
+                .page(page)
+                .pages((int) Math.ceil((double) total / size))
+                .build();
 
-        PaginationResponse.Pagination pagination = new PaginationResponse.Pagination();
-        pagination.setTotal(total);
-        pagination.setLimit(size);
-        pagination.setCurrentPage(page);
-        pagination.setTotalPages((int) Math.ceil((double) total / size));
-        paginationResponse.setPagination(pagination);
+        PaginationResponse<CommentDTO> paginationResponse = PaginationResponse.<CommentDTO>builder()
+                .content(commentDTOs)
+                .pagination(pagination)
+                .build();
 
-        return CommentsResponse.success(paginationResponse);
+        return AppResponse.successful(paginationResponse);
     }
 
     @Override
-    public CommentsResponse<PaginationResponse<CommentDTO>> searchComments(
-            String query, int page, int size, String sort) {
+    public AppResponse<PaginationResponse<CommentDTO>> searchComments(String query, int page, int size, String sort) {
         log.info("Searching comments with RSQL query: {} - page: {}, size: {}, sort: {}", query, page, size, sort);
 
         try {
@@ -318,17 +327,19 @@ public class CommentServiceImpl implements CommentService {
             List<CommentDTO> commentDTOs =
                     comments.stream().map(this::enrichCommentWithUser).toList();
 
-            PaginationResponse<CommentDTO> paginationResponse = new PaginationResponse<>();
-            paginationResponse.setContent(commentDTOs);
+            PaginationResponse.Pagination pagination = PaginationResponse.Pagination.builder()
+                    .total(total)
+                    .limit(size)
+                    .page(page)
+                    .pages((int) Math.ceil((double) total / size))
+                    .build();
 
-            PaginationResponse.Pagination pagination = new PaginationResponse.Pagination();
-            pagination.setTotal(total);
-            pagination.setLimit(size);
-            pagination.setCurrentPage(page);
-            pagination.setTotalPages((int) Math.ceil((double) total / size));
-            paginationResponse.setPagination(pagination);
+            PaginationResponse<CommentDTO> paginationResponse = PaginationResponse.<CommentDTO>builder()
+                    .content(commentDTOs)
+                    .pagination(pagination)
+                    .build();
 
-            return CommentsResponse.success(paginationResponse);
+            return AppResponse.successful(paginationResponse);
 
         } catch (Exception e) {
             log.error("Error parsing RSQL query: {}", query, e);

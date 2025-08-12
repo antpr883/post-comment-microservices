@@ -1,4 +1,4 @@
-package com.andev.user.model.constants;
+package com.andev.comment.model.constants;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
@@ -13,17 +13,6 @@ public final class ApiConstants {
     public static final String BREAK_LINE = "\n";
     public static final String TIME_ZONE_PACKAGE_NAME = "java.time.zone";
     public static final String DASH = "-";
-
-    // API paths
-    public static final String API_BASE_PATH = "/api/v1";
-    public static final String USERS_PATH = "/users";
-    public static final String ROLES_PATH = "/roles";
-
-    // Pagination defaults
-    public static final String DEFAULT_PAGE_NUMBER = "0";
-    public static final String DEFAULT_PAGE_SIZE = "10";
-    public static final String DEFAULT_SORT_FIELD = "id";
-    public static final String DEFAULT_SORT_DIRECTION = "asc";
     public static final String PASSWORD_ALL_CHARACTERS =
             "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789~`!@#$%^&*()-_=+[{]}\\|;:'\",<.>/?";
     public static final String PASSWORD_LETTERS_UPPER_CASE = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";

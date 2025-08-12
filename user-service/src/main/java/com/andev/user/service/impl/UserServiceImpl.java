@@ -11,6 +11,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.andev.user.config.aop.AuditLog;
 import com.andev.user.exception.DataExistException;
 import com.andev.user.exception.NotFoundException;
 import com.andev.user.model.domain.dto.UserDto;
@@ -24,6 +25,8 @@ import com.andev.user.model.enums.UserStatus;
 import com.andev.user.repository.RoleRepository;
 import com.andev.user.repository.UserRepository;
 import com.andev.user.service.UserService;
+import com.andev.user.web.response.AppResponse;
+import com.andev.user.web.response.PaginationResponse;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -35,6 +38,7 @@ import lombok.extern.slf4j.Slf4j;
 @Service
 @RequiredArgsConstructor
 @Transactional
+@AuditLog
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
@@ -77,13 +81,24 @@ public class UserServiceImpl implements UserService {
         return userMapper.toDtoWithRoles(user, roleMapper);
     }
 
+    /**
+     * Updates an existing user with provided data.
+     *
+     * Only updates non-null fields from the DTO, allowing partial updates.
+     * Validates user existence and returns the updated user with role information.
+     *
+     * @param id  the user ID to update
+     * @param dto the user data with fields to update
+     * @return updated UserDto with roles
+     * @throws NotFoundException if user with given ID doesn't exist
+     */
     @Override
     public UserDto update(Long id, UserDto dto) {
         log.info("Updating user with id: {}", id);
         User user =
                 userRepository.findById(id).orElseThrow(() -> new NotFoundException("User not found with id: " + id));
 
-        // For update method, we need to manually copy fields since we don't have UserUpdateRequestDto
+        // Partial update - only update non-null fields
         if (dto.getEmail() != null) user.setEmail(dto.getEmail());
         if (dto.getNickname() != null) user.setNickname(dto.getNickname());
         if (dto.getStatus() != null) user.setStatus(dto.getStatus());
@@ -91,6 +106,15 @@ public class UserServiceImpl implements UserService {
         return userMapper.toDtoWithRoles(user, roleMapper);
     }
 
+    /**
+     * Permanently deletes a user by ID.
+     *
+     * Validates that the user exists before deletion to provide clear error message.
+     * This is a hard delete operation - user data will be permanently removed.
+     *
+     * @param id the user ID to delete
+     * @throws NotFoundException if user with given ID doesn't exist
+     */
     @Override
     public void deleteById(Long id) {
         log.info("Deleting user with id: {}", id);
@@ -108,7 +132,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @CacheEvict(value = "users", allEntries = true)
-    public UserDto createUser(UserRequestDto requestDto) {
+    public AppResponse<UserDto> createUser(UserRequestDto requestDto) {
         log.info("Creating new user: {}", requestDto.getEmail());
 
         if (userRepository.existsByEmail(requestDto.getEmail())) {
@@ -133,12 +157,13 @@ public class UserServiceImpl implements UserService {
 
         user = userRepository.save(user);
 
-        return userMapper.toDtoWithRoles(user, roleMapper);
+        UserDto userDto = userMapper.toDtoWithRoles(user, roleMapper);
+        return AppResponse.successful(userDto);
     }
 
     @Override
     @CacheEvict(value = "users", allEntries = true)
-    public UserDto updateUser(Long id, UserUpdateRequestDto updateDto) {
+    public AppResponse<UserDto> updateUser(Long id, UserUpdateRequestDto updateDto) {
         log.info("Updating user with id: {}", id);
 
         User user =
@@ -160,7 +185,8 @@ public class UserServiceImpl implements UserService {
         }
 
         user = userRepository.save(user);
-        return userMapper.toDto(user);
+        UserDto userDto = userMapper.toDto(user);
+        return AppResponse.successful(userDto);
     }
 
     @Override
@@ -189,9 +215,10 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional(readOnly = true)
-    public Page<UserDto> findByStatus(UserStatus status, Pageable pageable) {
+    public AppResponse<PaginationResponse<UserDto>> findByStatus(UserStatus status, Pageable pageable) {
         log.info("Finding users by status: {} with pagination: {}", status, pageable);
-        return userRepository.findByStatus(status, pageable).map(user -> userMapper.toDtoWithRoles(user, roleMapper));
+        Page<User> userPage = userRepository.findByStatus(status, pageable);
+        return toPaginatedResponse(userPage);
     }
 
     @Override
@@ -284,5 +311,43 @@ public class UserServiceImpl implements UserService {
         // TODO: Implement RSQL search using RsqlParserService
         // For now, return all users
         return findAll();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public AppResponse<PaginationResponse<UserDto>> findAllUsers(Pageable pageable) {
+        log.info("Finding all users with pagination: {}", pageable);
+        Page<User> userPage = userRepository.findAll(pageable);
+        return toPaginatedResponse(userPage);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public AppResponse<PaginationResponse<UserDto>> searchUsers(String rsqlQuery, Pageable pageable) {
+        log.info("Searching users with RSQL query: {} and pagination: {}", rsqlQuery, pageable);
+        // TODO: Implement RSQL search with pagination
+        // For now, return all users
+        Page<User> userPage = userRepository.findAll(pageable);
+        return toPaginatedResponse(userPage);
+    }
+
+    private AppResponse<PaginationResponse<UserDto>> toPaginatedResponse(Page<User> page) {
+        List<UserDto> userDtos = page.getContent().stream()
+                .map(user -> userMapper.toDtoWithRoles(user, roleMapper))
+                .toList();
+
+        PaginationResponse.Pagination pagination = PaginationResponse.Pagination.builder()
+                .total(page.getTotalElements())
+                .limit(page.getSize())
+                .page(page.getNumber())
+                .pages(page.getTotalPages())
+                .build();
+
+        PaginationResponse<UserDto> response = PaginationResponse.<UserDto>builder()
+                .content(userDtos)
+                .pagination(pagination)
+                .build();
+
+        return AppResponse.successful(response);
     }
 }
